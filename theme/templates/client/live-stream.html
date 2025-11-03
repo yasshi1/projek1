@@ -21,13 +21,11 @@
     </li>
   </ul>
 </div>
-<img class="h-auto w-auto rounded-lg" src="{% url 'video-feed' %}">
+<div class="relative w-full aspect-video rounded-xl bg-black">
+  <img class="h-full w-full rounded-lg" src="{% url 'video-feed' %}">
+  <div class="absolute top-4 right-4 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full z-10">
+    LIVE
+  </div>
+</div>
 
-<video class="h-full w-full rounded-lg" controls autoPlay>
-    <source
-    src="{% url 'video-feed' %}"
-    type="video/mp4"
-    />
-    Your browser does not support the video tag.
-</video>
 {% endblock %}    

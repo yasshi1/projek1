@@ -25,6 +25,7 @@ urlpatterns = [
     path('management/expense', views.Management_E, name="management-expense"),
     path('management/pengajuan-barang', views.Management_P, name="management-pengajuan"),
     path('management/rincian-pekerjaan', views.Management_RP, name="management-rincian"),
+    path('management/rincian-logistik', views.Management_RL, name="management-rl"),
     path('admin-jangga/', views.Admin, name="admin-jangga"),
     path('edit-profil/<int:pk>', views.Profil, name="edit-profil"),
     path('change-password/', views.Change_Password, name="change-password"),

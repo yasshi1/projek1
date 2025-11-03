@@ -8,7 +8,6 @@ from django.http import StreamingHttpResponse
 from .forms import LoginForm, RegisterForm, ProjekForm, InvoiceForm, POform, AnggaranForm, MonitoringForm, ReportForm, updateProfileForm, photoProfileForm, changePasswordForm, pengajuanForm, barangKeluarForm, dailyForm, penagihanForm, breakdownForm
 from .models import *
 import cv2
-import threading
 from django.contrib import messages
 from django.http import JsonResponse
 import pandas as pd
@@ -680,7 +679,7 @@ def Management_PB(request):
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Data projek baru berhasil disimpan')
-                return redirect('management-projek-baru')
+                return redirect('projek-baru')
             else:
                 messages.error(request, 'data input salah')
         else:
@@ -851,11 +850,11 @@ def Management_RP(request):
         if request.method == 'POST':
             if 'inputProjek' in request.POST:
                 pro = request.POST['pilih']
-                anggaran = Jenis_Anggaran.objects.filter(nomor_SPK_id=pro).only('nama_jenis')
+                anggaran = Jenis_Anggaran.objects.filter(client=pro).only('nama_jenis')
                 
                 context = {'projek':projek,'pro':pro,'anggaran':anggaran}
                 return render(request, 'finance/breakdown-rab.html', context)
-            if 'inputAnggaran' in request.POST:
+            if 'inputAnggaran1' in request.POST:
                 uploaded_files = request.FILES['lampiran-rab']
                 fs = FileSystemStorage()                    
                 fs.save(uploaded_files.name, uploaded_files)      
@@ -868,13 +867,13 @@ def Management_RP(request):
                 
                 spk = request.POST['spk']
                 df['nomor_SPK'] = spk
-                df = df.rename(columns ={'URAIAN PEKERJAAN':'nama_jenis','nomor_SPK':'nomor_SPK_id'})
+                df = df.rename(columns ={'URAIAN PEKERJAAN':'nama_jenis','nomor_SPK':'client_id'})
 
                 df.to_sql(
                             'janggadb_jenis_anggaran', con=engine, index=False, if_exists='append'
                 )
                 messages.add_message(request, messages.SUCCESS, 'Data berhasil diinputkan')
-            if 'inputLogistik' in request.POST:
+            if 'inputAnggaran2' in request.POST:
                 uploaded_files = request.FILES['lampiran-rab']
                 fs = FileSystemStorage()                    
                 fs.save(uploaded_files.name, uploaded_files)      
@@ -890,7 +889,7 @@ def Management_RP(request):
                 jenis = request.POST['kelompok']
                 df['jenis_anggaran'] = jenis
 
-                df = df.rename(columns ={'URAIAN PEKERJAAN':'nama_barang','client':'client_id_id','jenis_anggaran':'jenis_anggaran_id'})
+                df = df.rename(columns ={'URAIAN PEKERJAAN':'nama_rincian','client':'client_id_id','jenis_anggaran':'jenis_anggaran_id'})
 
                 df.to_sql(
                             'janggadb_breakdown_rab', con=engine, index=False, if_exists='append'
@@ -899,6 +898,48 @@ def Management_RP(request):
 
         context = {'projek':projek}
         return render(request,'finance/breakdown-rab.html', context)    
+    else:
+        messages.error(request, 'Akses gagal')
+        logout(request)
+        return redirect('index') 
+
+def Management_RL(request):
+    engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/jangga_db')
+    user = request.user
+    if user.is_authenticated and user.is_management:
+        projek = Project.objects.only('id')
+        if request.method == 'POST':
+            if 'inputProjek' in request.POST:
+                pro = request.POST['pilih']
+                rincian = Breakdown_RAB.objects.filter(client_id=pro).only('nama_rincian')
+                
+                context = {'projek':projek,'pro':pro,'rincian':rincian}
+                return render(request, 'finance/rincian-logistik.html', context)
+            if 'inputLogistik' in request.POST:
+                uploaded_files = request.FILES['lampiran-rab']
+                fs = FileSystemStorage()                    
+                fs.save(uploaded_files.name, uploaded_files)      
+                # simpan file ke dalam local server
+                file_name = uploaded_files.name 
+
+                df = pd.read_excel("/srv/jcr/projek1/data/" + file_name)
+                pd.set_option("display.max_rows", None)
+                pd.set_option("display.max_columns", None)  
+
+                client = request.POST.get('spk')
+                df['client'] = client
+                jenis = request.POST['kelompok']
+                df['jenis_rincian'] = jenis
+
+                df = df.rename(columns ={'URAIAN PEKERJAAN':'nama_barang','client':'client_id','jenis_rincian':'breakdown_id'})
+
+                df.to_sql(
+                            'janggadb_rincian_logistik', con=engine, index=False, if_exists='append'
+                )
+                messages.add_message(request, messages.SUCCESS, 'Data berhasil diinputkan')
+
+        context = {'projek':projek}
+        return render(request,'finance/rincian-logistik.html', context)
     else:
         messages.error(request, 'Akses gagal')
         logout(request)

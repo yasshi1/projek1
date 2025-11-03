@@ -36,45 +36,60 @@
                     "optionClasses": "advance-select-option selected:select-active",
                     "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"icon-[tabler--check] shrink-0 size-4 text-primary hidden selected:block \"></span></div>"
                     }' required>
-                        <option disabled selected value="">Pilih Projek</option>
-                        {% if projek %} {% for p in projek %}
+                        <option disabled selected value=""></option>
+                        {% for p in projek %}
                         <option value="{{ p.id }}">{{ p.nomor_SPK }}</option>
-                        {% endfor %} {% endif %}
+                        {% endfor %}
                     </select>
                 </div>
                 <button class="btn btn-success" type="submit" id="inputProjek" name="inputProjek">Submit</button>
             </form>
         </fieldset>
-        {% if pro %}
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">Input Hasil Breakdown</h2>
-        <form class="flex flex-col" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="hidden" name="spk" id="spk" value="{{ pro }}" />
-            <div class="advance-select relative mb-4">
-                    <select class="hidden" id="kelompok" name="kelompok" data-select='{
-                    "placeholder": "Untuk Anggaran",
-                    "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
-                    "toggleClasses": "p-2 max-w-md advance-select-toggle select select-disabled:pointer-events-none select-disabled:opacity-40",
-                    "hasSearch": true,
-                    "dropdownClasses": "advance-select-menu max-w-xs max-h-52 pt-0 overflow-y-auto",
-                    "optionClasses": "advance-select-option selected:select-active",
-                    "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"icon-[tabler--check] shrink-0 size-4 text-primary hidden selected:block \"></span></div>"
-                    }'>
-                        <option disabled selected value="">Untuk Anggaran</option>
-                        {% for a in anggaran %}
-                        <option value="{{ a.id }}">{{ a.nama_jenis }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            <input type="file" class="file-input validator p-2 w-auto" name="lampiran-rab" id="lampiran-rab" required/>
-            <p class="validator-hint hidden mb-4">Required</p>
-            <div class="join justify-between">
-                <button type="submit" name="inputAnggaran" id="inputAnggaran" class="join-item bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150">Input Anggaran</button>
-                <button type="submit" name="inputLogistik" id="inputLogistik" class="join-item bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150">Input Logistik</button>
-            </div>
-        </form>
-        {% endif %}
     </div>
+    {% if anggaran %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+        <div class="bg-base-100 rounded-lg p-4">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Input Breakdown 2</h2>
+            <form class="flex flex-col" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="spk" id="spk" value="{{ pro }}" />
+                <input type="file" class="file-input validator p-2 w-auto" name="lampiran-rab" id="lampiran-rab" required/>
+                <p class="validator-hint hidden mb-4">Required</p>
+                <div class="join justify-between">
+                    <button type="submit" name="inputAnggaran1" id="inputAnggaran1" class="join-item bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150">Input Data</button>
+                </div>
+            </form>
+        </div>
+        <div class="bg-base-100 rounded-lg p-4">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Input Breakdown 2</h2>
+            <form class="flex flex-col" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="spk" id="spk" value="{{ pro }}" />
+                <div class="advance-select relative mb-4">
+                        <select class="hidden" id="kelompok" name="kelompok" data-select='{
+                        "placeholder": "Untuk Anggaran",
+                        "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
+                        "toggleClasses": "p-2 max-w-lg advance-select-toggle select select-disabled:pointer-events-none select-disabled:opacity-40",
+                        "hasSearch": true,
+                        "dropdownClasses": "advance-select-menu max-w-xs max-h-52 pt-0 overflow-y-auto",
+                        "optionClasses": "advance-select-option selected:select-active",
+                        "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"icon-[tabler--check] shrink-0 size-4 text-primary hidden selected:block \"></span></div>"
+                        }'>
+                            <option disabled selected value=""></option>
+                            {% for a in anggaran %}
+                            <option value="{{ a.id }}">{{ a.nama_jenis }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                <input type="file" class="file-input validator p-2 w-auto" name="lampiran-rab" id="lampiran-rab" required/>
+                <p class="validator-hint hidden mb-4">Required</p>
+                <div class="join justify-between">
+                    <button type="submit" name="inputAnggaran2" id="inputAnggaran2" class="join-item bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150">Input Data</button>
+                </div>
+            </form>    
+        </div>
+    </div>
+    {% endif %}
 
 <script src="{% static "js/flyonui.js" %}"></script>
 

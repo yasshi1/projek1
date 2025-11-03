@@ -25,10 +25,7 @@ class Project(models.Model):
     jenis_projek = models.CharField(max_length=100)
     nomor_SPK = models.CharField(max_length=100)
     nominal_kontrak = models.BigIntegerField(null=False, default=0)
-    lampiran_SPK = models.FileField(upload_to='projek_baru/', blank=True)
-
-    def __str__(self):
-        return self.client 
+    lampiran_SPK = models.FileField(upload_to='projek_baru/', blank=True)    
     
     def __str__(self):
         return self.nomor_SPK 
@@ -82,7 +79,7 @@ class PO(models.Model):
 
 class Jenis_Anggaran(models.Model):
     nama_jenis = models.CharField(max_length=100, null = False)
-    nomor_SPK = models.ForeignKey(Project, null=True, on_delete=models.CASCADE)
+    client = models.ForeignKey(Project, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.nama_jenis
@@ -130,10 +127,18 @@ class Mapping_Report(models.Model):
 class Breakdown_RAB(models.Model):
     client_id = models.ForeignKey(Project, null=False, on_delete=models.CASCADE)
     jenis_anggaran = models.ForeignKey(Jenis_Anggaran, null=True, on_delete=models.CASCADE)
-    nama_barang = models.CharField(max_length=100)   
+    nama_rincian = models.CharField(max_length=100)   
 
     def __str__(self):
-        return self.nama_barang 
+        return self.nama_rincian 
+
+class Rincian_Logistik(models.Model):
+    client = models.ForeignKey(Project, null=False, on_delete=models.CASCADE)
+    breakdown = models.ForeignKey(Breakdown_RAB, null=False, on_delete=models.CASCADE)
+    nama_barang = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.nama_barang
 
 class Pengajuan_Barang(models.Model):
     status_po = [
