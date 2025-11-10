@@ -17,7 +17,7 @@
     }' required>
       <option disabled selected value="">Pilih Projek</option>
       {% for p in projek %}
-      <option value="{{ p.id }}">{{ p.client }}</option>
+      <option value="{{ p.id }}">{{ p.nomor_SPK }}</option>
       {% endfor %}
     </select>
     <p class="validator-hint">Required</p>
@@ -25,7 +25,7 @@
   </form>
 </fieldset>
 
-{% if stock %}
+{% if stock and transaksi %}
 <ul class="menu menu-horizontal bg-base-200 my-2 p-0">
     <li>
         <label for="my_modal_cekStock" class="btn btn-success">Stock Barang</label>
@@ -34,6 +34,12 @@
         <label for="my_modal_barangKeluar" class="btn btn-success">Barang Keluar</label>
     </li>     
 </ul>
+{% endif %}
+
+{% if pilihan %}
+    {% if not stock %}
+    <h3 class="text-lg font-bold mt-4">Data Kosong</h3>
+    {% endif %}
 {% endif %}
 
 <input type="checkbox" class="modal-toggle" id="my_modal_cekStock"/>
@@ -106,13 +112,13 @@
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
                     <th scope="col" class="px-6 py-3">
+                        Tanggal
+                    </th>
+                    <th scope="col" class="px-6 py-3">
                         Nama Barang
                     </th>
                     <th scope="col" class="px-6 py-3">
-                        Jumlah Barang
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        Sisa Barang
+                        Aktual
                     </th>
                     <th scope="col" class="px-6 py-3">
                         Satuan
@@ -123,10 +129,10 @@
                 {% for t in transaksi %}
                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                        {{ t.stock_opname }}
+                        {{ t.tanggal_transaksi }}
                     </th>
                     <td class="px-6 py-4">
-                        {{ t.tanggal_transaksi }}
+                        {{ t.stock_opname }}
                     </td>
                     <td class="px-6 py-4">
                         {{ t.jumlah }}

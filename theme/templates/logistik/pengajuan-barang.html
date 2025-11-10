@@ -5,7 +5,7 @@
     <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
         <h2 class="text-2xl font-bold text-gray-800 mb-4">Input Pengajuan Barang</h2>
         {% if messages %}
-            {% for m in messages %}``
+            {% for m in messages %}
             <div role="alert" class="alert alert-success my-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -24,15 +24,93 @@
         {% endif %}
         <form class="flex flex-col" method="post">
             {% csrf_token %}
-            <label for="client_id">Client:</label>
-            {{ form.client_id }}
-            {{ form.nama_barang }}
-            {{ form.tanggal }}
-            {{ form.jumlah }}
-            {{ form.satuan }}
+            <select class="select validator p-2 mb-4 w-auto" id="pro" name="pro">
+                <option disabled selected value="">Pilih Projek</option>
+                {% for p in projek %}
+                <option value="{{ p.id }}">{{ p.nomor_SPK }}</option>
+                {% endfor %}
+            </select>
+            <select class="select validator p-2 mb-4 w-auto" id="anggaran" name="anggaran" >  
+                <option value="">Pilih Anggaran</option>                    
+            </select>
+            <select class="select validator p-2 mb-4 w-auto" id="breakdown" name="breakdown" >  
+                <option value="">Rincian</option>                    
+            </select>
+            <select class="select validator p-2 mb-4 w-auto" id="logistik" name="logistik" >  
+                <option value="">Nama Barang</option>                    
+            </select>           
+            <input type="number" class="input validator p-2 mb-4 w-auto" name="jumlah" id="jumlah" placeholder="Jumlah" required/>
+            <p class="validator-hint hidden mb-4">Required</p>
+            <input type="text" class="input validator p-2 mb-4 w-auto" name="satuan" id="satuan" placeholder="Satuan" required/>
+            <p class="validator-hint hidden mb-4">Required</p>
+            <input type="text" class="input validator p-2 mb-4 w-auto" name="tanggal" id="tanggal" placeholder="Tanggal" onfocus="(this.type='date')" onblur="(this.type='text')" required/>
+            <p class="validator-hint hidden mb-4">Required</p>
             <button type="submit" class="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150">Submit</button>
         </form>
     </div>
 
-<script src="{% static "js/flyonui.js" %}"></script>    
+<script src="{% static "js/flyonui.js" %}"></script>   
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script> 
+$(document).ready(function() { 
+    $('#pro').change(function() { 
+        var projekId = $(this).val(); 
+        if (projekId) { 
+            $.ajax({ 
+                url: "{% url 'get-anggaran' %}", 
+                data: { 'projek_id': projekId }, 
+                dataType: 'json', 
+                success: function(data) { 
+                    $('#anggaran').empty().append('<option value="">Pilih Anggaran</option>'); 
+                    $('#breakdown').empty().append('<option value="">Rincian</option>'); 
+                    $('#logistik').empty().append('<option value="">Nama Barang</option>'); 
+                    $.each(data, function(key, value) { $('#anggaran').append('<option value="' + value.id + '">' + value.jenis_anggaran__nama_jenis + '</option>'); 
+                    }); 
+                } 
+            }); 
+        } else { 
+            $('#anggaran').empty().append('<option value="">Pilih Anggaran</option>'); 
+            $('#breakdown').empty().append('<option value="">Rincian</option>'); 
+            $('#logistik').empty().append('<option value="">Nama Barang</option>'); 
+        } 
+    }); 
+    $('#anggaran').change(function() { 
+        var anggaranId = $(this).val(); 
+        if (anggaranId) { 
+            $.ajax({ 
+                url: "{% url 'get-breakdown' %}", 
+                data: { 'anggaran_id': anggaranId }, 
+                dataType: 'json', 
+                success: function(data) { 
+                    $('#breakdown').empty().append('<option value="">Rincian</option>'); 
+                    $('#logistik').empty().append('<option value="">Nama Barang</option>'); 
+                    $.each(data, function(key, value) { $('#breakdown').append('<option value="' + value.id + '">' + value.nama_rincian + '</option>'); 
+                    }); 
+                } 
+            }); 
+        } else { 
+            $('#breakdown').empty().append('<option value="">Rincian</option>'); 
+            $('#logistik').empty().append('<option value="">Nama Barang</option>'); 
+        } 
+    }); 
+    $('#breakdown').change(function() { 
+        var breakdownId = $(this).val(); 
+        if (breakdownId) { 
+            $.ajax({ 
+                url: "{% url 'get-logistik' %}", 
+                data: { 'breakdown_id': breakdownId }, 
+                dataType: 'json', 
+                success: function(data) { 
+                    $('#logistik').empty().append('<option value="">Nama Barang</option>'); 
+                    $.each(data, function(key, value) { $('#logistik').append('<option value="' + value.id + '">' + value.nama_barang + '</option>'); 
+                    }); 
+                } 
+            }); 
+        } else { 
+            $('#logistik').empty().append('<option value="">Nama Barang</option>'); 
+        } 
+    }); 
+
+}); 
+</script>
 {% endblock %}

@@ -18,7 +18,7 @@
             <select  class="select validator max-w-xs" id="pilihan" name="pilihan" required>
                 <option disabled selected value="">Pilih Projek</option>
                 {% for p in projek %}
-                    <option value="{{ p.id }}">{{ p.client}}</option>
+                    <option value="{{ p.id }}">{{ p.nomor_SPK}}</option>
                 {% endfor %}
             </select>
             <p class="validator-hint">Required</p>
@@ -32,6 +32,9 @@
             <tr>
                 <th>#</th>
                 <th>Tanggal</th>
+                <th>Projek</th>
+                <th>Anggaran</th>
+                <th>Rincian</th>
                 <th>Nama Barang</th>
                 <th>Jumlah</th>
                 <th>Satuan</th>
@@ -43,11 +46,14 @@
                 <tr>
                     <th>{{ forloop.counter }}</th>
                     <td>{{ p.tanggal }}</td>
+                    <td>{{ p.client_id }}</td>
+                    <td>{{ p.anggaran.jenis_anggaran }}</td>
+                    <td>{{ p.breakdown }}</td>
                     <td>{{ p.nama_barang }}</td>
                     <td>{{ p.jumlah }}</td>
                     <td>{{ p.satuan }}</td>
                     <td class="px-6 py-4">
-                    <form method="post">    
+                    <form method="post" action="{% url 'update-pengajuan' p.id %}">
                         <fieldset class="fieldset">
                                 {% csrf_token %}
                                 <div class="join min-w-md">

@@ -1,7 +1,142 @@
 {% extends "finance/layout.html" %}
 
 {% block content %}
-<div>
-    <h1 class="font-extrabold text-red-900 text-4xl">{{ user }}</h1>
+<div class="breadcrumbs text-lg font-bold mt-2">
+  <ul>
+    <li>
+      <a>
+        <svg
+          class="w-5 h-5 text-blue-700 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 22 21">
+          <path
+            d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z" />
+          <path
+            d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z" />
+        </svg>
+        Dashboard
+      </a>
+    </li>
+  </ul>
 </div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 mb-6 gap-2">
+  <div class="cursor-pointer overflow-hidden relative transition-all duration-500 w-48 h-16 bg-neutral-100 rounded-lg shadow-xl flex flex-row items-center justify-evenly gap-2 p-2 before:absolute before:w-full hover:before:top-0 before:duration-500 before:-top-1 before:h-1 before:bg-purple-200">
+    <div>
+      <span class="font-bold text-left">Budget</span>
+      <p class="line-clamp-3 self-end text-right">
+        Rp. {% if budget %} 
+              {{ budget }} 
+            {% else %}
+              0  
+            {% endif %}
+      </p>
+    </div>
+  </div>
+  <div class="cursor-pointer overflow-hidden relative transition-all duration-500 w-48 h-16 bg-neutral-100 rounded-lg shadow-xl flex flex-row items-center justify-evenly gap-2 p-2 before:absolute before:w-full hover:before:top-0 before:duration-500 before:-top-1 before:h-1 before:bg-purple-200">
+    <div>
+      <span class="font-bold text-left">Actual</span>
+      <p class="line-clamp-3 self-end text-right">
+        Rp. {% if aktual %} 
+              {{ aktual }} 
+            {% else %}
+              0  
+            {% endif %} 
+      </p>
+    </div>
+  </div>
+  <div class="cursor-pointer overflow-hidden relative transition-all duration-500 w-48 h-16 bg-neutral-100 rounded-lg shadow-xl flex flex-row items-center justify-evenly gap-2 p-2 before:absolute before:w-full hover:before:top-0 before:duration-500 before:-top-1 before:h-1 before:bg-purple-200">
+    <div>
+      <span class="font-bold text-left">Difference</span>
+      <p class="line-clamp-3 self-end text-right">
+        Rp. {% if diff %} 
+              {{ diff }} 
+            {% else %}
+              0  
+            {% endif %}
+      </p>
+    </div>
+  </div>
+</div>
+<fieldset class="fieldset mb-2">
+  <form method="post">
+    {% csrf_token %}
+    <div class="join">
+      <div>
+        <select
+          class="select join-item"
+          id="client"
+          name="client"
+          required>
+          <option selected value="">Pilih Projek</option>
+          {% for p in projek %}
+            <option value="{{ p.id }}">{{ p.nomor_SPK }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button class="btn btn-success join-item" type="submit">
+        <img
+          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAbElEQVR4nO3UsQ2AMAwF0YMRWI1JGAQxFyvRmIaCgiYxJNj6J7lJ9aQkBhUoe2niA2oTwAQgI2ACll6AEdivs60F4KkZOG6IgcaAEkQRwByzpgB4rqDrI8z9De1vi6g0AUwAsgDMOXEBii86AcUnw48cScs3AAAAAElFTkSuQmCC"
+          alt="enter-2" />
+      </button>
+    </div>
+  </form>
+</fieldset>
+{% if page_obj %}
+<div class="overflow-x-auto rounded-box border border-gray-300 shadow-md bg-base-100">
+    <table class="table table-sm mt-4">
+        <thead>
+        <tr>
+            <th>Jenis Anggaran</th>
+            <th>Projek</th>
+            <th>Total Anggaran</th>
+            <th>Aktual</th>
+            <th>Sisa Budget</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for p in page_obj %}
+                <tr class="{% if p.sisa_anggaran < 0 %}bg-red-600{% endif %}">
+                    <td>{{ p.jenis_anggaran__nama_jenis }}</td>
+                    <td>{{ p.client_id__nomor_SPK }}</td>
+                    <td>Rp. {{ p.total_anggaran }}</td>
+                    <td>Rp. {{ p.total_expense }}</td>
+                    <td>Rp. {{ p.sisa_anggaran }}                          
+                    </td>
+                </tr>   
+            {% endfor %} 
+        </tbody>
+    </table>
+    <!-- Pagination -->
+    <nav class="flex justify-center items-center gap-x-1 mt-2" aria-label="Pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}">
+        <button type="button" class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-2 text-sm rounded-lg text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-white/10 dark:focus:bg-white/10" aria-label="Previous">
+            <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"></path>
+            </svg>
+            <span aria-hidden="true" class="hidden sm:block">Previous</span>
+        </button>
+    </a>
+    {% endif %}
+    <div class="flex items-center gap-x-1">
+        <span class="min-h-9.5 min-w-9.5 flex justify-center items-center text-gray-800 py-2 px-3 text-sm rounded-lg focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:border-neutral-700 dark:text-white dark:focus:bg-white/10">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    </div>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}">
+        <button type="button" class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-2 text-sm rounded-lg text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-white/10 dark:focus:bg-white/10">
+            <span aria-hidden="true" class="hidden sm:block">Next</span>
+            <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 18 6-6-6-6"></path>
+            </svg>
+        </button>
+    </a>
+    {% endif %}
+    </nav>
+    <!-- End Pagination -->
+</div>
+{% endif %}
+
 {% endblock %}

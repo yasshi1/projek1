@@ -24,6 +24,30 @@
 </div>
 
 <div class="w-full bg-white shadow-md p-6">
+    <fieldset class="fieldset mb-2">
+        <form method="post">
+            {% csrf_token %}
+            <div class="join max-w-3xs">
+            <div>
+                <select
+                class="select join-item"
+                id="client"
+                name="client"
+                required>
+                <option selected value="">Pilih Projek</option>
+                {% for p in projek %}
+                    <option value="{{ p.id }}">{{ p.nomor_SPK }}</option>
+                {% endfor %}
+                </select>
+            </div>
+            <button class="btn btn-success join-item" type="submit">
+                <img
+                src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAbElEQVR4nO3UsQ2AMAwF0YMRWI1JGAQxFyvRmIaCgiYxJNj6J7lJ9aQkBhUoe2niA2oTwAQgI2ACll6AEdivs60F4KkZOG6IgcaAEkQRwByzpgB4rqDrI8z9De1vi6g0AUwAsgDMOXEBii86AcUnw48cScs3AAAAAElFTkSuQmCC"
+                alt="enter-2" />
+            </button>
+            </div>
+        </form>
+    </fieldset>
     <legend class="fieldset-legend mb-3">Status Barang</legend>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -60,9 +84,7 @@
                     </th>
                     <td class="px-6 py-4">
                         {{ s.vendor }}
-                        {% for p in projek%}
-                        <input class="input validator w-auto p-2" type="number" id="clients" name="clients" hidden value="{{ p.id }}">
-                        {% endfor %}
+                        <input class="input validator w-auto p-2" type="text" id="clients" name="clients" hidden value="{{ s.client_id.id }}">  
                     </td>
                     <td class="px-6 py-4">
                         {{ s.kuantitas }}
@@ -105,7 +127,7 @@
     </div>
 </div>
 
-<div class="w-full bg-white shadow-md p-6">
+<div class="w-full bg-white shadow-md p-2">
     <legend class="fieldset-legend mb-3">Stock Barang</legend>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -151,35 +173,36 @@
             </tbody>
         </table>
     </div>
+    <!-- Pagination -->
+    <nav class="flex justify-center items-center gap-x-1 mt-2" aria-label="Pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}">
+        <button type="button" class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-2 text-sm rounded-lg text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-white/10 dark:focus:bg-white/10" aria-label="Previous">
+            <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"></path>
+            </svg>
+            <span aria-hidden="true" class="hidden sm:block">Previous</span>
+        </button>
+    </a>
+    {% endif %}
+    <div class="flex items-center gap-x-1">
+        <span class="min-h-9.5 min-w-9.5 flex justify-center items-center text-gray-800 py-2 px-3 text-sm rounded-lg focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:border-neutral-700 dark:text-white dark:focus:bg-white/10">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    </div>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}">
+        <button type="button" class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-2 text-sm rounded-lg text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-white/10 dark:focus:bg-white/10">
+            <span aria-hidden="true" class="hidden sm:block">Next</span>
+            <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 18 6-6-6-6"></path>
+            </svg>
+        </button>
+    </a>
+    {% endif %}
+    </nav>
+    <!-- End Pagination -->
 </div>
 
-<!-- Pagination -->
-<nav class="flex justify-center items-center gap-x-1 my-2" aria-label="Pagination">
-  {% if page_obj.has_previous %}
-  <a href="?page={{ page_obj.previous_page_number }}">
-    <button type="button" class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-2 text-sm rounded-lg text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-white/10 dark:focus:bg-white/10" aria-label="Previous">
-        <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m15 18-6-6 6-6"></path>
-        </svg>
-        <span aria-hidden="true" class="hidden sm:block">Previous</span>
-    </button>
-  </a>
-  {% endif %}
-  <div class="flex items-center gap-x-1">
-    <span class="min-h-9.5 min-w-9.5 flex justify-center items-center text-gray-800 py-2 px-3 text-sm rounded-lg focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:border-neutral-700 dark:text-white dark:focus:bg-white/10">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-  </div>
-  {% if page_obj.has_next %}
-  <a href="?page={{ page_obj.next_page_number }}">
-    <button type="button" class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-2 text-sm rounded-lg text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-white/10 dark:focus:bg-white/10">
-        <span aria-hidden="true" class="hidden sm:block">Next</span>
-        <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m9 18 6-6-6-6"></path>
-        </svg>
-    </button>
-  </a>
-  {% endif %}
-</nav>
-<!-- End Pagination -->
+
 
 
 {% endblock %}

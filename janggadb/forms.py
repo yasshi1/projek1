@@ -40,6 +40,7 @@ class RegisterForm(UserCreationForm):
         widget = forms.PasswordInput(
             attrs = {
                 "id":"hs-toggle-password",
+                "name":"hs-toggle-password",
                 "type":"password",
                 "class": "input validator bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500",
                 "min-length":8,
@@ -52,6 +53,7 @@ class RegisterForm(UserCreationForm):
         widget = forms.PasswordInput(
             attrs = {
                 "id":"hs-toggle-confirm",
+                "name":"hs-toggle-confirm",
                 "class": "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             }
         )
@@ -251,9 +253,13 @@ class POform(forms.ModelForm):
     tanggal_po = forms.DateField(
         widget = forms.DateInput(
             attrs = {
+                'class':'input validator p-2 mb-4 w-auto',
                 'id':'tgl-po',
                 'name':'tgl-po',
                 'type':'date',
+                'onfocus':"(this.type='date')",
+                'onblur':"(this.type='text')",
+                'placeholder':'Tanggal',
             }
         )
     )
@@ -265,6 +271,18 @@ class POform(forms.ModelForm):
                 'name':'deskripsi',
                 'type':'text',
                 'placeholder':'Deskripsi Barang',
+                'style':'height: 110px',
+            }
+        )
+    )
+    satuan = forms.CharField(
+        widget = forms.TextInput(
+            attrs = {
+                'class':'input validator p-2 mb-4 w-auto',
+                'id':'satuan',
+                'name':'satuan',
+                'type':'text',
+                'placeholder':'Satuan',
             }
         )
     )
@@ -303,65 +321,20 @@ class POform(forms.ModelForm):
             }
         )
     )
+    lampiran = forms.FileField(
+        widget = forms.FileInput(
+            attrs = {
+                'class':'file-input p-2 mb-4 w-auto',
+                'id':'lampiran',
+                'name':'lampiran',
+                'type':'file',
+            }
+        )
+    )
 
     class Meta:
         model = PO
-        fields = ['vendor','nomor_po','tanggal_po','deskripsi_barang','tipe','kuantitas','harga_satuan','total','client_id']
-        
-class AnggaranForm(forms.ModelForm):   
-    deskripsi = forms.CharField(
-        widget = forms.TextInput(
-            attrs = {
-                'class':'input validator p-2 mb-4 w-auto',
-                'id':'deskripsi',
-                'name':'deskripsi',
-                'type':'text',
-                'placeholder':'Deskripsi Anggaran',
-            }
-        )
-    )        
-    total_anggaran = forms.IntegerField(
-        widget = forms.NumberInput(
-            attrs = {
-                'class':'input validator p-2 mb-4 w-auto',
-                'id':'total-anggaran',
-                'name':'total-anggaran',
-                'type':'number',
-                'placeholder':'Jumlah Anggaran',
-            }
-        )
-    )
-    client_id = forms.ModelChoiceField(
-        queryset = Project.objects.only('id'),
-        empty_label = 'Pilih Client',
-        widget = forms.Select(
-            attrs = {
-                'class':'select validator p-2 mb-4 w-auto'            
-            }
-        )
-    )
-    jenis_anggaran = forms.ModelChoiceField(
-        queryset = Jenis_Anggaran.objects.only('id'),
-        label = 'Jenis Anggaran:',
-        widget = forms.Select(
-            attrs = {
-                'class':'hidden',
-                'data-select':"""{
-    "placeholder": "Pilih Anggaran",
-    "toggleTag": "<button type=\'button\' aria-expanded=\'false\'></button>",
-    "toggleClasses": "p-2 mb-4 max-w-md advance-select-toggle select select-disabled:pointer-events-none select-disabled:opacity-40",
-    "hasSearch": true,
-    "dropdownClasses": "advance-select-menu max-h-52 pt-0 overflow-y-auto",
-    "optionClasses": "advance-select-option selected:select-active",
-    "optionTemplate": "<div class=\'flex justify-between items-center w-full\'><span data-title></span></div>"
-    }""",
-            }
-        )
-    )        
-
-    class Meta:
-        model = Anggaran
-        fields = ['jenis_anggaran','deskripsi','total_anggaran','client_id']
+        fields = ['vendor','nomor_po','tanggal_po','deskripsi_barang','tipe','kuantitas','harga_satuan','satuan','total','client_id','lampiran','status']    
 
 class MonitoringForm(forms.ModelForm):
     tanggal = forms.DateField(
@@ -429,7 +402,7 @@ class MonitoringForm(forms.ModelForm):
 
     class Meta:
         model = monitoring_PO
-        fields = ['client_id','nomor_po','tanggal','lampiran_sj','lampiran_foto']
+        fields = ['client_id','nomor_po','tanggal','lampiran_sj','lampiran_foto','jumlah']
 
 class ReportForm(forms.ModelForm):
     tata_letak = forms.CharField(
@@ -628,73 +601,6 @@ class changePasswordForm(PasswordChangeForm):
         model = User
         fields = ['old_password','new_password1','new_password2']
 
-class pengajuanForm(forms.ModelForm):
-    client_id = forms.ModelChoiceField(
-        queryset = Project.objects.only('id'),
-        label = 'Client:',
-        widget = forms.Select(
-            attrs = {
-                'class':'hidden',
-                'data-select':"""{
-    "placeholder": "Pilih Client",
-    "toggleTag": "<button type=\'button\' aria-expanded=\'false\'></button>",
-    "toggleClasses": "p-2 mb-4 max-w-md advance-select-toggle select select-disabled:pointer-events-none select-disabled:opacity-40",
-    "hasSearch": true,
-    "dropdownClasses": "advance-select-menu max-h-52 pt-0 overflow-y-auto",
-    "optionClasses": "advance-select-option selected:select-active",
-    "optionTemplate": "<div class=\'flex justify-between items-center w-full\'><span data-title></span></div>"
-    }""",
-            }
-        )
-    )    
-    nama_barang = forms.CharField(
-        widget = forms.TextInput(
-            attrs = {
-                'class':'input validator p-2 mb-4 w-auto',
-                'id':'nama-barang',
-                'name':'nama-barang',
-                'type':'text',
-                'placeholder':'Nama Barang',
-            }
-        )
-    )        
-    tanggal = forms.DateField(
-        widget = forms.DateInput(
-            attrs = {
-                'class':'input validator p-2 mb-4 w-auto',
-                'id':'tgl',
-                'name':'tgl',
-                'type':'date',
-            }
-        )
-    )
-    jumlah = forms.IntegerField(
-        widget = forms.NumberInput(
-            attrs = {
-                'class':'input validator p-2 mb-4 w-auto',
-                'id':'jumlah',
-                'name':'jumlah',
-                'type':'number',
-                'placeholder':'Jumlah Barang',
-            }
-        )
-    )
-    satuan = forms.CharField(
-        widget = forms.TextInput(
-            attrs = {
-                'class':'input validator p-2 mb-4 w-auto',
-                'id':'satuan',
-                'name':'satuan',
-                'type':'text',
-                'placeholder':'Satuan',
-            }
-        )
-    )
-
-    class Meta:
-        model = Pengajuan_Barang
-        fields = ['client_id','nama_barang','tanggal','jumlah','satuan']
-
 class barangKeluarForm(forms.ModelForm):
     client_id = forms.ModelChoiceField(
         queryset = Project.objects.only('id'),
@@ -830,6 +736,18 @@ class dailyForm(forms.ModelForm):
             }
         )
     )
+    tanggal = forms.DateField(
+        widget = forms.DateInput(
+            attrs = {
+                'class':'input validator p-2 mb-4 w-auto',
+                'id':'tgl',
+                'name':'tgl',
+                'type':'date',
+                'onfocus':"(this.type='date')",
+                'onblur':"(this.type='text')",
+            }
+        )
+    )
     lampiran_dokumentasi = forms.FileField(
         widget = forms.FileInput(
             attrs= {
@@ -960,4 +878,84 @@ class breakdownForm(forms.ModelForm):
 
     class Meta:
         model = Breakdown_RAB
+        fields = '__all__'
+
+class kurvasForm(forms.ModelForm):
+    client = forms.ModelChoiceField(
+        queryset = Project.objects.only('id'),
+        widget = forms.Select(
+            attrs = {
+                'class':'hidden',
+                'data-select':"""{
+    "placeholder": "Pilih Projek",
+    "toggleTag": "<button type=\'button\' aria-expanded=\'false\'></button>",
+    "toggleClasses": "p-2 mb-4 max-w-lg advance-select-toggle select validator select-disabled:pointer-events-none select-disabled:opacity-40",
+    "hasSearch": true,
+    "dropdownClasses": "advance-select-menu max-h-52 pt-0 overflow-y-auto",
+    "optionClasses": "advance-select-option selected:select-active",
+    "optionTemplate": "<div class=\'flex justify-between items-center w-full\'><span data-title></span></div>"
+    }""",
+            }
+        )
+    ) 
+    lampiran = forms.FileField(
+        widget = forms.FileInput(
+            attrs= {
+                'class':'file-input p-2 w-auto',
+                'id':'lampiran',
+                'name':'lampiran',
+                'type':'file',
+            }
+        )
+    )               
+    
+    class Meta:
+        model = Kurva_S
+        fields = '__all__'
+
+class weeklyForm(forms.ModelForm):
+    client = forms.ModelChoiceField(
+        queryset = Project.objects.only('id'),
+        widget = forms.Select(
+            attrs = {
+                'class':'hidden',
+                'data-select':"""{
+    "placeholder": "Pilih Projek",
+    "toggleTag": "<button type=\'button\' aria-expanded=\'false\'></button>",
+    "toggleClasses": "p-2 mb-4 max-w-lg advance-select-toggle select validator select-disabled:pointer-events-none select-disabled:opacity-40",
+    "hasSearch": true,
+    "dropdownClasses": "advance-select-menu max-h-52 pt-0 overflow-y-auto",
+    "optionClasses": "advance-select-option selected:select-active",
+    "optionTemplate": "<div class=\'flex justify-between items-center w-full\'><span data-title></span></div>"
+    }""",
+            }
+        )
+    ) 
+    tanggal = forms.DateField(
+        widget = forms.DateInput(
+            attrs = {
+                'class':'input validator p-2 mb-4 w-auto',
+                'id':'tgl',
+                'name':'tgl',
+                'type':'date',
+                'onfocus':"(this.type='date')",
+                'onblur':"(this.type='text')",
+            }
+        )
+    )
+    isi = forms.CharField(
+        widget = Textarea(
+            attrs = {
+                'class':'input validator p-2 mb-4 w-auto',
+                'id':'isi',
+                'name':'isi',
+                'type':'text',
+                'placeholder':'Isi Laporan',
+                'style':'height: 110px',
+            }
+        )
+    )    
+
+    class Meta:
+        model = Logistik_Weekly
         fields = '__all__'

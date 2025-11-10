@@ -1,5 +1,5 @@
 {% extends "client/layout.html" %} {% load static %} 
-{% block title %}{{user}} - Dashboard{% endblock %}
+{% block title %}Admin - Dashboard{% endblock %}
 {% block content %}
 <div class="breadcrumbs text-lg font-bold mt-2">
   <ul>
@@ -23,33 +23,87 @@
 </div>
 
 <div class="grid grid-cols-2 md:grid-cols-5 mb-4">
-  <div class="cursor-pointer overflow-hidden relative transition-all duration-500 hover:translate-y-2 w-48 h-16 bg-neutral-100 rounded-lg shadow-xl flex flex-row items-center justify-evenly gap-2 p-2 before:absolute before:w-full hover:before:top-0 before:duration-500 before:-top-1 before:h-1 before:bg-purple-200">
+  <div class="cursor-pointer overflow-hidden relative transition-all duration-500 w-48 h-16 bg-neutral-100 rounded-lg shadow-xl flex flex-row items-center justify-evenly gap-2 p-2 before:absolute before:w-full hover:before:top-0 before:duration-500 before:-top-1 before:h-1 before:bg-purple-200">
     <div>
       <span class="font-bold text-left">Rata-rata Progress</span>
       <p class="line-clamp-3 self-end text-right">
-        {{ rata }} %
+        {% if rata %}
+          {{ rata }} %
+        {% else %}
+          0%    
+        {% endif %}  
       </p>
     </div>
   </div>
-  <div class="cursor-pointer overflow-hidden relative transition-all duration-500 hover:translate-y-2 w-48 h-16 bg-neutral-100 rounded-lg shadow-xl flex flex-row items-center justify-evenly gap-2 p-2 before:absolute before:w-full hover:before:top-0 before:duration-500 before:-top-1 before:h-1 before:bg-purple-200">
+  <div class="cursor-pointer overflow-hidden relative transition-all duration-500 w-48 h-16 bg-neutral-100 rounded-lg shadow-xl flex flex-row items-center justify-evenly gap-2 p-2 before:absolute before:w-full hover:before:top-0 before:duration-500 before:-top-1 before:h-1 before:bg-purple-200">
     <div>
       <span class="font-bold text-left">Progress Selesai</span>
       <p class="line-clamp-3 self-end text-right">
-        {{ total }} Pekerjaan
+        {% if total %}
+          {{ total }} pekerjaan
+        {% else %}
+          0 pekerjaan    
+        {% endif %}  
       </p>
     </div>
   </div>
-  <div class="cursor-pointer overflow-hidden relative transition-all duration-500 hover:translate-y-2 w-48 h-16 bg-neutral-100 rounded-lg shadow-xl flex flex-row items-center justify-evenly gap-2 p-2 before:absolute before:w-full hover:before:top-0 before:duration-500 before:-top-1 before:h-1 before:bg-purple-200">
-    <div>
-      <span class="font-bold text-left">Test</span>
-      <p class="line-clamp-3 self-end text-right">
-        0
-      </p>
+  <button data-popover-target="popover-hover" data-popover-placement="bottom" data-popover-trigger="hover" type="button"> 
+    <div class="cursor-pointer overflow-hidden relative transition-all duration-500 w-48 h-16 bg-neutral-100 rounded-lg shadow-xl flex flex-row items-center justify-evenly gap-2 p-2 before:absolute before:w-full hover:before:top-0 before:duration-500 before:-top-1 before:h-1 before:bg-purple-200">
+      <div class="dropdown dropdown-hover">
+        <span class="font-bold text-left">Man Power Hari Ini</span>
+        <p class="line-clamp-3 self-end text-right">
+          {% if total_mp %}
+            {{ total_mp }} 
+          {% else %}
+            0    
+          {% endif %}  
+        </p>
+      </div>
     </div>
+  </button>
+  {% if daily %}
+  <div data-popover id="popover-hover" role="tooltip" class="absolute z-10 invisible inline-block w-64 text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-xs opacity-0 dark:text-gray-400 dark:border-gray-600 dark:bg-gray-800">
+    <ul class="list bg-base-100 rounded-box shadow-md">
+      <li class="list-row">
+        <div>
+          <div>HARIAN</div>
+          <div class="text-xs uppercase font-semibold opacity-60">{{daily.harian}}</div>
+        </div>
+      </li>
+      <li class="list-row">
+        <div>
+          <div>ME</div>
+          <div class="text-xs uppercase font-semibold opacity-60">{{daily.me}}</div>
+        </div>
+      </li>
+      <li class="list-row">
+        <div>
+          <div>SIPIL</div>
+          <div class="text-xs uppercase font-semibold opacity-60">{{daily.sipil}}</div>
+        </div>
+      </li>
+      <li class="list-row">
+        <div>
+          <div>PLUMBING</div>
+          <div class="text-xs uppercase font-semibold opacity-60">{{daily.plumbing}}</div>
+        </div>
+      </li>
+      <li class="list-row">
+        <div>
+          <div>GENTENG</div>
+          <div class="text-xs uppercase font-semibold opacity-60">{{daily.genteng}}</div>
+        </div>
+      </li>
+    </ul>
+
+    <div data-popper-arrow></div>
   </div>
+  {% else %}
+    <p></p>
+  {% endif %}
 </div>
 
-<div class="chart">
+<div class="chart mt-8">
   <fieldset class="fieldset mb-2">
     <form method="post">
       {% csrf_token %}
@@ -57,12 +111,12 @@
         <div>
           <select
             class="select join-item"
-            id="fase"
-            name="fase"
+            id="client"
+            name="client"
             required>
             <option selected value="">Pilih Projek</option>
             {% for p in projek %}
-            <option value="{{ p.id }}">{{ p.client }}</option>
+              <option value="{{ p.id }}"{% if pro == p.id %} selected {% endif %}>{{ p.nomor_SPK }}</option>
             {% endfor %}
           </select>
         </div>

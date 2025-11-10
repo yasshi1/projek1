@@ -1,0 +1,107 @@
+{% extends "pm/layout.html" %} {% load static %} {% block content %}
+<!-- From Uiverse.io by themrsami -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+  <div class="bg-base-100 rounded-lg p-4">
+  <h2 class="text-2xl font-bold text-gray-800 mb-4">Update Kurva S</h2>
+  {% if messages %}
+    {% for m in messages %}
+    <div role="alert" class="alert alert-success my-2">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6 shrink-0 stroke-current"
+        fill="none"
+        viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{{ m }}</span>
+    </div>
+    {% endfor %}
+  {% endif %}
+    <fieldset class="fieldset">
+      <form class="flex flex-col" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="client">Projek:</label>
+        {{ form.client }}
+        {{ form.lampiran }}  
+        <label class="label my-1">Max size 5 MB</label>
+        <button
+          type="submit"
+          name="inputKurvas"
+          id="inputKurvas"
+          class="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150">
+          Submit
+        </button>
+      </form>
+    </fieldset>  
+  </div>
+  <div class="bg-base-100 rounded-lg p-4">
+  <h2 class="text-2xl font-bold text-gray-800 mb-4">Cek Kurva S</h2>
+  <fieldset class="fieldset mb-6">
+      <form method="post">
+          {% csrf_token %}
+          <legend class="fieldset-legend">Projek</legend>
+          <div class="advance-select relative mb-4">
+              <select class="hidden" id="pilih" name="pilih" data-select='{
+              "placeholder": "Nomor SPK",
+              "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
+              "toggleClasses": "p-2 max-w-md advance-select-toggle select select-disabled:pointer-events-none select-disabled:opacity-40",
+              "hasSearch": true,
+              "dropdownClasses": "advance-select-menu max-w-xs max-h-52 pt-0 overflow-y-auto",
+              "optionClasses": "advance-select-option selected:select-active",
+              "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"icon-[tabler--check] shrink-0 size-4 text-primary hidden selected:block \"></span></div>"
+              }' required>
+                  <option disabled selected value=""></option>
+                  {% for p in projek %}
+                  <option value="{{ p.id }}">{{ p.nomor_SPK }}</option>
+                  {% endfor %}
+              </select>
+          </div>
+          <button class="btn btn-success" type="submit" id="inputProjek" name="inputProjek">Submit</button>
+      </form>
+  </fieldset>
+  </div>
+</div>
+{% if kurva %}
+<div class="overflow-x-auto rounded-box border border-gray-300 bg-base-100">
+    <table class="table table-sm mt-4">
+        <thead>
+        <tr>
+            <th>Tanggal </th>
+            <th>Projek</th>
+            <th>Lampiran</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for k in kurva %}
+                <tr>
+                    <td>{{ k.tanggal }}</td>
+                    <td>{{ k.client }}</td>
+                    <td><a class="link link-info" href="{{ k.lampiran.url }}" target="_blank">{{ k.get_filename}}</a></td>
+                </tr>   
+            {% endfor %} 
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<script src="{% static "js/flyonui.js" %}"></script>    
+<script>
+const fileInput = document.getElementById('lampiran');
+const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
+
+fileInput.addEventListener('change', function() {
+  if (fileInput.files.length > 0) {
+    const fileSize = fileInput.files[0].size; // Size in bytes
+    if (fileSize > maxSizeInBytes) {
+      alert('File size exceeds the limit of 5MB.');
+      fileInput.value = ''; // Clear the selected file
+    }
+  }
+});
+</script>
+
+{% endblock %}

@@ -14,7 +14,7 @@
     }' required>
       <option disabled selected value="">Pilih Projek</option>
       {% if projek %} {% for p in projek %}
-      <option value="{{ p.id }}">{{ p.client }}</option>
+      <option value="{{ p.id }}">{{ p.nomor_SPK }}</option>
       {% endfor %} {% endif %}
     </select>
     <p class="validator-hint">Required</p>
@@ -22,9 +22,10 @@
   </form>
 </fieldset>
 
-{% if files %}
+{% if invoice %}
+<h2 class="text-md font-bold text-gray-800 mt-4">Data Invoice</h2>
 <div class="overflow-x-scroll">    
-    <table class="table table-sm mt-4">
+    <table class="table table-sm mt-2">
         <thead>
         <tr>
             <th></th>
@@ -36,13 +37,43 @@
         </tr>
         </thead>
         <tbody>
-        {% for f in files %}
+        {% for f in invoice %}
             <tr>
                 <th>{{ forloop.counter }}</th>
                 <td>{{ f.file }}</td>
                 <td>{{ f.client }}</td>
                 <td>{{ f.tanggal_terbit }}</td>
                 <td>{{ f.tanggal_jatuh_tempo }}</td>
+                <td><a class="link link-info" href="{{ f.file_url }}" target="_blank">{{ f.file_name }}</a></td>
+            </tr>   
+        {% endfor %}      
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if po %}
+<h2 class="text-md font-bold text-gray-800 mt-4">Data PO</h2>
+<div class="overflow-x-scroll">    
+    <table class="table table-sm mt-4">
+        <thead>
+        <tr>
+            <th></th>
+            <th>File</th>
+            <th>Client</th>
+            <th>Vendor</th>
+            <th>Tanggal</th>
+            <th>Lampiran</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for f in po %}
+            <tr>
+                <th>{{ forloop.counter }}</th>
+                <td>{{ f.file }}</td>
+                <td>{{ f.client }}</td>
+                <td>{{ f.vendor }}</td>
+                <td>{{ f.tanggal}}</td>
                 <td><a class="link link-info" href="{{ f.file_url }}" target="_blank">{{ f.file_name }}</a></td>
             </tr>   
         {% endfor %}      

@@ -30,7 +30,7 @@
             <select class="select validator max-w-xs" required name="pilihan" id="pilihan">
                 <option disabled selected value="">Pilih Client</option>
                     {% for c in client %}
-                        <option value={{ c.id }}>{{ c.client }}</option>   
+                        <option value={{ c.id }}>{{ c.nomor_SPK }}</option>   
                     {% endfor %}             
             </select>
             <p class="validator-hint">Required</p>
@@ -38,7 +38,7 @@
         </form>
     </fieldset>
     {% if data_anggaran %}
-    <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6 mt-4">
+    <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6 my-4">
         {% if msg %}
            <div class="text-shadow-gray-950 text-2xl"> {{ msg }} </div>
         {% endif %}
@@ -58,5 +58,31 @@
             <button type="submit" class="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150" id="updateAnggaran" name="updateAnggaran">Update</button>
         </form>
     </div>
+    <div class="overflow-x-auto rounded-box border border-gray-300 shadow-md bg-base-100">
+        <table class="table table-sm mt-4">
+            <thead>
+            <tr>
+                <th>Tanggal </th>
+                <th>Jenis Anggaran</th>
+                <th>Projek</th>
+                <th>Aktual</th>
+                <th>Sisa Budget</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for e in data_expense %}
+                    <tr class="{% if e.sisa_anggaran < 0 %}bg-red-600{% endif %}">
+                        <td>{{ e.tanggal }}</td>
+                        <td>{{ e.jenis_anggaran }}</td>
+                        <td>{{ e.client_id }}</td>
+                        <td>{{ e.total }}</td>
+                        <td>Rp. {{e.sisa_budget}}                          
+                        </td>
+                    </tr>   
+                {% endfor %} 
+            </tbody>
+        </table>
+    </div>
+    
     {% endif %}
 {% endblock %}

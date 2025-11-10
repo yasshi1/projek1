@@ -21,7 +21,7 @@
     </div>
     {% endfor %}
   {% endif %}
-  <form class="flex flex-col" method="post">
+  <form class="flex flex-col" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <label for="id_client_id">Client:</label>
     {{ form.client_id }}
@@ -30,6 +30,7 @@
     {{ form.me }}    
     {{ form.plumbing }}    
     {{ form.genteng }}    
+    {{ form.tanggal}}
     <label for="lampiran_cuaca">Lampiran Cuaca Hari Ini</label>
     {{ form.lampiran_cuaca }}    
     <label for="lampiran_dokumentasi">Lampiran Dokumentasi:</label>

@@ -18,7 +18,7 @@
             <select  class="select validator max-w-xs" id="pilihan" name="pilihan" required>
                 <option disabled selected value="">Pilih Projek</option>
                 {% for p in projek %}
-                    <option value="{{ p.id }}">{{ p.client}}</option>
+                    <option value="{{ p.id }}">{{ p.nomor_SPK}}</option>
                 {% endfor %}
             </select>
             <p class="validator-hint">Required</p>
@@ -54,7 +54,7 @@
                     <td><a class="link link-info" href="{{ i.lampiran.url }}" target="_blank">{{ i.get_filename}}</a></td>
                     <td>
                     <fieldset class="fieldset">
-                        <form method="post" action="{% url 'management-update' i.nomor_invoice %}">
+                        <form method="post" action="{% url 'update-invoice' i.nomor_invoice %}">
                             {% csrf_token %}
                             <div  class="join min-w-2xs">
                                 <div>

@@ -11,37 +11,42 @@
             <select class="select validator max-w-xs" required name="client" id="client">
                 <option disabled selected value="">Pilih Client</option>
                     {% for c in client %}
-                        <option value={{ c.id }}>{{ c.client }}</option>   
+                        <option value={{ c.id }}>{{ c.nomor_SPK }}</option>   
                     {% endfor %}             
             </select>
             <p class="validator-hint">Required</p>
             <button class="btn btn-success" type="submit">Submit</button>
     </fieldset>
-    {% if expense %}
-    <table class="table table-sm mt-4">
+    {% if anggaran %}
+    <div class="overflow-x-auto rounded-box border border-gray-300 bg-base-100">
+        <table class="table table-sm mt-4">
             <thead>
             <tr>
-                <th>No. </th>
+                <th>Tanggal </th>
                 <th>Task</th>
-                <th>Client</th>
+                <th>No SPK</th>
                 <th>Deskripsi</th>
-                <th>Tanggal</th>
+                <th>Budget</th>
+                <th>Aktual</th>
                 <th>Sisa Budget</th>
             </tr>
             </thead>
             <tbody>
-                {% for d in expense %}
-                    <tr class="{% if d.total_anggaran < 0 %}bg-red-600{% endif %}">
+                {% for a in anggaran %}
+                    <tr class="{% if a.sisa_anggaran < 0 %}bg-red-600{% endif %}">
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ d.anggaran_id__jenis_anggaran }}</td>
-                        <td>{{ d.anggaran_id__client_id }}</td>
-                        <td>{{ d.anggaran_id__deskripsi }}</td>
-                        <td>{{ d.tanggal }}</td>
-                        <td>Rp. {{ d.anggaran_id__total_anggaran }}</td>
-
+                        <td>{{ a.jenis_anggaran }}</td>
+                        <td>{{ a.client_id }}</td>
+                        <td>{{ a.deskripsi }}</td>
+                        <td>Rp. {{ a.total_anggaran }}</td>
+                        <td>{{ data_expense.anggaran_id.total }}</td>
+                        <td>Rp. {% if a.sisa_anggaran is not Null  %}{{ a.sisa_anggaran }}{% endif %} 
+                            {% if a.sisa_anggaran is Null  %}{{ a.total_anggaran }}{% endif %}                            
+                        </td>
                     </tr>   
                 {% endfor %} 
             </tbody>
         </table>
+    </div>
     {% endif %}
 {% endblock %}
