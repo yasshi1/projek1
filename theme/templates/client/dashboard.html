@@ -51,6 +51,12 @@
 
 <div class="chart mt-8">
   <div class="chart-overlay"></div>
-  <div class="chart-inner">{{ diagram|safe }}</div>
+  <div class="chart-inner">
+    {% if diagram %}
+      {{ diagram|safe }}
+    {% else %}
+      <p>No data to display.</p>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}
