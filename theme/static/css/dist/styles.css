@@ -5667,9 +5667,6 @@
   .w-full {
     width: 100%;
   }
-  .max-w-2xs {
-    max-width: var(--container-2xs);
-  }
   .max-w-3xs {
     max-width: var(--container-3xs);
   }
@@ -7126,12 +7123,6 @@
     content: var(--tw-content);
     --tw-duration: 500ms;
     transition-duration: 500ms;
-  }
-  @media (hover: hover) {
-    .hover\:translate-y-2:hover {
-      --tw-translate-y: calc(var(--spacing) * 2);
-      translate: var(--tw-translate-x) var(--tw-translate-y);
-    }
   }
   @media (hover: hover) {
     .hover\:bg-blue-700:hover {

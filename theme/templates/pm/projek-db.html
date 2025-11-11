@@ -8,9 +8,9 @@
       id="pilihan"
       name="pilihan"
       required>
-      <option disabled selected value="">Pilih Projek</option>
+      <option disabled selected value="">Nomor SPK</option>
       {% for p in projek %}
-      <option value="{{ p.client }}">{{ p.client }}</option>
+      <option value="{{ p.client }}">{{ p.nomor_SPK }}</option>
       {% endfor %}
     </select>
     <p class="validator-hint">Required</p>

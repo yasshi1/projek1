@@ -105,6 +105,8 @@ def Profil(request, pk):
             return redirect('edit-profil', pk=user.id)
         else:
             messages.error(request, 'Input anda salah')
+            return redirect('edit-profil', pk=user.id)
+
     else:
         user_form = updateProfileForm(instance=user)  
         photo_form = photoProfileForm(instance=profile)
@@ -118,9 +120,11 @@ def Admin(request):
     if user.is_authenticated and user.is_adminProject:
         import plotly.express as px
         projek = Project.objects.only('nomor_SPK')
+        old_pro = None
         if request.method == 'POST':
             engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/jangga_db')
-            pro = request.POST['client']
+            pro = request.POST['client']            
+            old_pro = int(pro)
             try:
                 daily = Daily_Report.objects.filter(client_id=pro).latest('tanggal')
                 total_manpower = (daily.harian + daily.me + daily.sipil + daily.genteng + daily.plumbing)
@@ -190,12 +194,13 @@ def Admin(request):
 
             diagram = fig.to_html()
             
-            context = {'user':user,'rata':average_persentase,'total':total_count,'diagram':diagram,'projek':projek,'pro':pro,'total_mp':total_manpower}
+            context = {'user':user,'rata':average_persentase,'total':total_count,'diagram':diagram,'projek':projek,'pro':pro,'total_mp':total_manpower,'old':old_pro,'daily':daily}
             return render(request,'admin/dashboard.html', context)
         else:
             engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/jangga_db')
             current_project = Project.objects.latest('tanggal')
             projek_id = current_project.id
+            old_pro = int(projek_id)
             try:
                 daily = Daily_Report.objects.filter(client_id=projek_id).latest('tanggal')
                 total_manpower = (daily.harian + daily.me + daily.sipil + daily.genteng + daily.plumbing)
@@ -265,7 +270,7 @@ def Admin(request):
 
             diagram = fig.to_html()
             
-            context = {'user':user,'rata':average_persentase,'total':total_count,'diagram':diagram,'projek':projek,'pro':projek_id,'total_mp':total_manpower,'daily':daily}
+            context = {'user':user,'rata':average_persentase,'total':total_count,'diagram':diagram,'projek':projek,'pro':projek_id,'total_mp':total_manpower,'daily':daily,'old':old_pro}
             return render(request,'admin/dashboard.html', context)
     else:
         messages.error(request, 'Akses gagal')
@@ -277,8 +282,10 @@ def Admin_PD(request):
     user = request.user
     if user.is_authenticated and user.is_adminProject:
         projek_client = Project.objects.only("client")
+        old_pro = None
         if request.method == 'POST':
             projek_form = request.POST['pilih']
+            old_pro = int(projek_form)
             projek = get_object_or_404(Project, pk=projek_form)
             po_obj = projek.pos.all()
             po_files = []
@@ -306,9 +313,23 @@ def Admin_PD(request):
                         'tanggal_terbit': invoice.tanggal_invoice,
                         'tanggal_jatuh_tempo': invoice.tanggal_jatuh_tempo,
                     })
-            
+            monitor = projek.monitor.all()
+            monitor_files = []
+            # Add monitors to the file list
+            for mon in monitor:
+                if mon.lampiran_sj and mon.lampiran_foto:
+                    monitor_files.append({
+                        'file': f"Nomor PO: {mon.nomor_po}",
+                        'file_sj': mon.lampiran_sj.url,
+                        'file_foto': mon.lampiran_foto.url,
+                        'sj_name': mon.get_sjname,
+                        'dok_name': mon.get_dokname,
+                        'client': mon.client_id,
+                        'tanggal': mon.tanggal,
+                        'jumlah': mon.jumlah,
+                    })            
 
-            context = {'projek':projek_client, 'invoice':invoice_files,'po':po_files}
+            context = {'projek':projek_client, 'invoice':invoice_files,'po':po_files,'monitor':monitor_files,'old':old_pro}
             return render(request, 'admin/projek-db.html', context)
         else: 
             context = {'projek':projek_client}
@@ -389,12 +410,13 @@ def Admin_KS(request):
     user = request.user
     if user.is_authenticated and user.is_adminProject:
         projek = Project.objects.only('id')
+        old_pro = None
         if request.method == 'POST':
             pro = request.POST['pilih']
+            old_pro = int(pro)
             kurva = Kurva_S.objects.filter(client=pro)
-            form = kurvasForm()
 
-            context = {'projek':projek,'kurva':kurva}
+            context = {'projek':projek,'kurva':kurva,'old':old_pro}
             return render(request, 'admin/kurva-s.html', context)            
         else:
             context = {'projek':projek}
@@ -410,9 +432,11 @@ def Project_Manager(request):
     if user.is_authenticated and user.is_projectManager:
         import plotly.express as px
         projek = Project.objects.only('nomor_SPK')
+        old_pro = None
         if request.method == 'POST':
             engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/jangga_db')
             pro = request.POST['client']
+            old_pro = int(pro)
             try:
                 daily = Daily_Report.objects.filter(client_id=pro).latest('tanggal')
                 total_manpower = (daily.harian + daily.me + daily.sipil + daily.genteng + daily.plumbing)
@@ -482,12 +506,13 @@ def Project_Manager(request):
 
             diagram = fig.to_html()
             
-            context = {'user':user,'rata':average_persentase,'total':total_count,'diagram':diagram,'projek':projek,'pro':pro,'total_mp':total_manpower}
+            context = {'user':user,'rata':average_persentase,'total':total_count,'diagram':diagram,'projek':projek,'pro':pro,'total_mp':total_manpower,'old':old_pro}
             return render(request,'pm/dashboard.html', context)
         else:
             engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/jangga_db')
             current_project = Project.objects.latest('tanggal')
             projek_id = current_project.id
+            old_pro = int(projek_id)
             try:
                 daily = Daily_Report.objects.filter(client_id=projek_id).latest('tanggal')
                 total_manpower = (daily.harian + daily.me + daily.sipil + daily.genteng + daily.plumbing)
@@ -557,7 +582,7 @@ def Project_Manager(request):
 
             diagram = fig.to_html()
             
-            context = {'user':user,'rata':average_persentase,'total':total_count,'diagram':diagram,'projek':projek,'pro':projek_id,'total_mp':total_manpower,'daily':daily}
+            context = {'user':user,'rata':average_persentase,'total':total_count,'diagram':diagram,'projek':projek,'old':projek_id,'total_mp':total_manpower,'daily':daily,'old':old_pro}
             return render(request,'pm/dashboard.html', context)
     else:
         messages.error(request, 'Akses gagal')
@@ -569,13 +594,15 @@ def Project_Manager_PR(request):
     user = request.user
     if user.is_authenticated and user.is_projectManager:
         projek = Project.objects.only('client')
+        old_pro = None
         if request.method == 'POST':
             client = request.POST['pilihan']
+            old_pro = int(client)
             client_po = PO.objects.filter(client_id=client)
-            context = {'projek':projek,'client_po':client_po}
+            context = {'projek':projek,'client_po':client_po,'old':old_pro}
             return render(request, 'pm/po-request.html', context)
         
-        context = {'projek':projek}
+        context = {'projek':projek,'old':old_pro}
         return render(request, 'pm/po-request.html', context)
     else:
         messages.error(request, 'Akses gagal')
@@ -593,6 +620,7 @@ def Project_Manager_KS(request):
     user = request.user
     if user.is_authenticated and user.is_projectManager:
         projek = Project.objects.only('id')
+        old_pro = None
         if request.method == 'POST':
             if 'inputKurvas' in request.POST:
                 form = kurvasForm(request.POST, request.FILES)
@@ -605,15 +633,16 @@ def Project_Manager_KS(request):
                     
             if 'inputProjek' in request.POST:
                 pro = request.POST['pilih']
+                old_pro = int(pro)
                 kurva = Kurva_S.objects.filter(client=pro)
                 form = kurvasForm()
 
-                context = {'form':form,'projek':projek,'kurva':kurva}
+                context = {'form':form,'projek':projek,'kurva':kurva,'old':old_pro}
                 return render(request, 'pm/kurva-s.html', context)            
         else:
             form = kurvasForm()
 
-        context = {'form':form,'projek':projek}
+        context = {'form':form,'projek':projek,'old':old_pro}
         return render(request, 'pm/kurva-s.html', context)            
     else:
         messages.error(request, 'Akses gagal')
@@ -621,30 +650,14 @@ def Project_Manager_KS(request):
         return redirect('index') 
     
 @login_required
-def Project_Manager_PD(request):
-    user = request.user
-    if user.is_authenticated and user.is_projectManager:
-        projek = Project.objects.only("client")
-        if request.method == 'POST':
-            client = request.POST['pilihan']
-            cdb = Project.objects.raw("SELECT * FROM janggadb_project WHERE client= %s", [client])
-            context = {'projek':projek, 'client':cdb}
-            return render(request, 'pm/projek-db.html', context)
-        else:
-            context = {'projek':projek}
-            return render(request, 'pm/projek-db.html', context)
-    else:
-        messages.error(request, 'Akses gagal')
-        logout(request)
-        return redirect('index')        
-
-@login_required
 def Logistik(request):
     user = request.user
     if user.is_authenticated and user.is_logistik:
         projek = Project.objects.only('id')
+        old_pro = None
         if request.method == 'POST':
             pro = request.POST['client']
+            old_pro = int(pro)
             status = PO.objects.filter(client_id=pro).select_related('client_id').exclude(status='barang sampai')
 
             opname = Stock_Opname.objects.filter(client_id=pro).order_by('persentase')
@@ -654,11 +667,12 @@ def Logistik(request):
             page_number = request.GET.get("page")
             page_obj = paginator.get_page(page_number)
 
-            context = {'page_obj':page_obj, 'status':status,'projek':projek}
+            context = {'page_obj':page_obj, 'status':status,'projek':projek,'old':old_pro}
             return render(request, 'logistik/dashboard.html', context)
         else:
             current_project = Project.objects.latest('tanggal')
             project = current_project.id
+            old_pro = int(project)
             status = PO.objects.filter(client_id=project).exclude(status='barang sampai')
 
             opname = Stock_Opname.objects.filter(client_id=project).order_by('persentase')
@@ -668,7 +682,7 @@ def Logistik(request):
             page_number = request.GET.get("page")
             page_obj = paginator.get_page(page_number)
 
-            context = {'page_obj':page_obj, 'status':status,'projek':projek}
+            context = {'page_obj':page_obj, 'status':status,'projek':projek,'old':old_pro}
             return render(request, 'logistik/dashboard.html', context)
     else:
         messages.error(request, 'Akses gagal')
@@ -695,9 +709,6 @@ def Logistik_updateStatus(request, id=id):
         PO.objects.filter(nomor_po=id).update(kuantitas=sisa_barang,status=stats)
         Stock_Opname.objects.update_or_create(nama_barang=barang, defaults={'client_id':client_obj, 'jumlah':jumlah, 'sisa_barang':sisa, 'satuan':satuan})
         return redirect('logistik-monitoring-po')   
- 
-
-
 
 @login_required
 def Logistik_Monitoring(request):
@@ -808,11 +819,12 @@ def Logistik_SO(request):
     user = request.user 
     if user.is_authenticated and user.is_logistik:
         projek = Project.objects.only('id')
+        old_pro = None
         form = barangKeluarForm()
         if request.method == 'POST':   
             if 'submitProjek' in request.POST:
                 pilihan = request.POST['pilih']
-                request.session['projek'] = pilihan
+                old_pro = int(pilihan)
                 stock = Stock_Opname.objects.filter(client_id=pilihan).order_by('persentase')
                 transaksi = Transaksi_SO.objects.filter(client_id=pilihan)
                 for s in stock:
@@ -834,7 +846,7 @@ def Logistik_SO(request):
                     messages.success(request, "Input data berhasil")
                     return redirect('logistik-so')
                 
-            context = {'projek':projek,'stock':stock,'form':form,'transaksi':transaksi,'pilihan':pilihan}
+            context = {'projek':projek,'stock':stock,'form':form,'transaksi':transaksi,'pilihan':pilihan,'old':old_pro}
             return render(request, 'logistik/stock-opname.html', context)
         else:
             context = {'projek':projek,'form':form}
@@ -851,23 +863,33 @@ def Management(request):
     if user.is_authenticated and user.is_management:
         from django.db.models import Sum, Value
         from django.db.models.functions import Coalesce
-        pro = Project.objects.only('id')
+        projek = Project.objects.only('id')
+        old_pro = None
         if request.method == 'POST':
             pro = request.POST['client']
+            old_pro = int(pro)
             try:
                 budget = (
                     Anggaran.objects
                     .filter(client_id=pro)
                     .aggregate(total_sum=Sum('total_anggaran')))['total_sum']
+            except:
+                budget = None
+
+            try:
                 aktual = (
                     data_Expense.objects
                     .filter(client_id=pro)
                     .aggregate(total_sum=Sum('total')))['total_sum']
-                diff = int(budget) - int(aktual)
             except:
-                budget = None
                 aktual = None
+
+            try:
+                diff = int(budget) - int(aktual)
+            except:                
                 diff = 0
+
+
                 
             data_anggaran = (
                 Anggaran.objects
@@ -881,19 +903,20 @@ def Management(request):
             page_obj = paginator.get_page(page_number)
 
 
-            context = {'projek':pro,'budget':budget,'aktual':aktual,'diff':diff,'page_obj':page_obj}
+            context = {'projek':projek,'budget':budget,'aktual':aktual,'diff':diff,'page_obj':page_obj,'old':old_pro}
             return render(request,'finance/dashboard.html', context)
         else:    
             current_project = Project.objects.latest('tanggal')
-            projek = current_project.id
+            project = current_project.id
+            old_pro = int(project)
             try:
                 budget = (
                     Anggaran.objects
-                    .filter(client_id=projek)
+                    .filter(client_id=project)
                     .aggregate(total_sum=Sum('total_anggaran')))['total_sum']
                 aktual = (
                     data_Expense.objects
-                    .filter(client_id=projek)
+                    .filter(client_id=project)
                     .aggregate(total_sum=Sum('total')))['total_sum']
                 diff = int(budget) - int(aktual)
             except:
@@ -903,7 +926,7 @@ def Management(request):
                 
             data_anggaran = (
                 Anggaran.objects
-                .filter(client_id=projek)
+                .filter(client_id=project)
                 .annotate(total_expense=Coalesce(Sum('data_expense__total'), Value(0)))
                 .values('jenis_anggaran__nama_jenis', 'total_anggaran', 'total_expense', 'client_id__nomor_SPK', 'sisa_anggaran')
             )
@@ -913,7 +936,7 @@ def Management(request):
             page_obj = paginator.get_page(page_number)
 
 
-            context = {'projek':pro,'budget':budget,'aktual':aktual,'diff':diff,'page_obj':page_obj}
+            context = {'projek':projek,'budget':budget,'aktual':aktual,'diff':diff,'page_obj':page_obj,'old':old_pro}
             return render(request,'finance/dashboard.html', context)
     else:
         messages.error(request, 'Akses gagal')
@@ -949,10 +972,12 @@ def Management_A(request):
         projek = Project.objects.only('id')        
         if request.method == 'POST':
             pro = request.POST['pro']
+            pro_obj = Project.objects.get(id=pro)
             anggaran = request.POST['anggaran']
+            anggaran_obj = Jenis_Anggaran.objects.get(id=anggaran)
             deskripsi = request.POST['deskripsi']
             total = request.POST['total']
-            form_anggaran = Anggaran(client_id=pro, jenis_anggaran=anggaran, deskripsi=deskripsi, total_anggaran=total)
+            form_anggaran = Anggaran(client_id=pro_obj, jenis_anggaran=anggaran_obj, deskripsi=deskripsi, total_anggaran=total)
             form_anggaran.save()
             return redirect('management-anggaran')        
         
@@ -976,12 +1001,13 @@ def Management_AC(request):
     user = request.user
     if user.is_authenticated and user.is_management:
         client = Project.objects.only("client")
+        old_pro = None
         if request.method == 'POST':
             client_input = request.POST['client']
+            old_pro = int(client_input)
             anggaran = Anggaran.objects.filter(client_id=client_input)
-            expense = data_Expense.objects.filter(client_id=client_input)
 
-            context = {'client':client,'anggaran':anggaran}
+            context = {'client':client,'anggaran':anggaran,'old':old_pro}
             return render(request, 'finance/cek-anggaran.html', context)
         else:
             context = {'client':client}
@@ -996,12 +1022,14 @@ def Management_E(request):
     user = request.user
     if user.is_authenticated and user.is_management:
         client = Project.objects.only("id")
+        old_pro = None
         if request.method == 'POST':
             if 'inputClient' in request.POST:
                 data = request.POST['pilihan']
+                old_pro = int(data)
                 data_anggaran = Anggaran.objects.filter(client_id=data).select_related('jenis_anggaran')
                 data_expense = data_Expense.objects.filter(client_id=data)
-                context = {'client':client,'data_anggaran':data_anggaran,'data':data,'data_expense':data_expense}
+                context = {'client':client,'data_anggaran':data_anggaran,'data':data,'data_expense':data_expense,'old':old_pro}
                 return render(request,'finance/expense.html', context)
             
             if 'updateAnggaran' in request.POST:
@@ -1010,15 +1038,19 @@ def Management_E(request):
                 total = request.POST['total']
                 client_id = request.POST['client_id']
                 anggaran_id = Anggaran.objects.filter(jenis_anggaran=jenis_anggaran,client_id=client_id).values_list('id', flat=True)
+                anggaran_total = Anggaran.objects.filter(jenis_anggaran=jenis_anggaran,client_id=client_id).values_list('total_anggaran', flat=True)
                 anggaran_sisa = Anggaran.objects.filter(jenis_anggaran=jenis_anggaran,client_id=client_id).values_list('sisa_anggaran', flat=True)
+                
+                anggaran_total_int = anggaran_total[0]
                 anggaran_int = anggaran_sisa[0]
                 total_int = int(total)
 
-                sisa_anggaran = anggaran_int - total_int
+                if anggaran_int is None:
+                    sisa_anggaran = anggaran_total_int - total_int
+                else:                    
+                    sisa_anggaran = anggaran_int - total_int
                 anggaran_id.update(sisa_anggaran=sisa_anggaran)
                 sisa_budget = sisa_anggaran
-                pemakaian = 1 - ((anggaran_int - sisa_budget) / anggaran_int)
-                pemakaian_persen = f"{pemakaian:.2%}"
                 expense = data_Expense(jenis_anggaran_id=jenis_anggaran,tanggal=tanggal,total=total,client_id_id=client_id,anggaran_id_id=anggaran_id, sisa_budget=sisa_budget)
                 expense.save()
 
@@ -1105,10 +1137,12 @@ def Management_P(request):
     user = request.user
     if user.is_authenticated and user.is_management:
         projek = Project.objects.only('client')
+        old_pro = None
         if request.method == 'POST':
-            client = request.POST['pilihan']            
+            client = request.POST['pilihan']      
+            old_pro = int(client)      
             client_obj = Pengajuan_Barang.objects.filter(client_id=client)
-            context = {'projek':projek, 'pengajuan':client_obj}
+            context = {'projek':projek, 'pengajuan':client_obj,'old':old_pro}
             return render(request,'finance/pengajuan-barang.html', context)            
         else:
             context = {'projek':projek}
@@ -1128,13 +1162,15 @@ def Management_RP(request):
     engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/jangga_db')
     user = request.user
     if user.is_authenticated and user.is_management:
-        projek = Project.objects.only('id')            
+        projek = Project.objects.only('id') 
+        old_pro = None           
         if request.method == 'POST':
             if 'inputProjek' in request.POST:
                 pro = request.POST['pilih']
+                old_pro = int(pro)
                 anggaran = Jenis_Anggaran.objects.filter(client=pro).only('nama_jenis')
                 
-                context = {'projek':projek,'pro':pro,'anggaran':anggaran}
+                context = {'projek':projek,'pro':pro,'anggaran':anggaran,'old':old_pro}
                 return render(request, 'finance/breakdown-rab.html', context)
             if 'inputAnggaran1' in request.POST:
                 uploaded_files = request.FILES['lampiran-rab']
@@ -1143,7 +1179,7 @@ def Management_RP(request):
                 # simpan file ke dalam local server
                 file_name = uploaded_files.name 
 
-                df = pd.read_excel(r"D:/Kerja/projek1_hosting/projek1/data/" + file_name)
+                df = pd.read_excel(r"D:/Kerja/projek1_hosting/projek1/data/rap/" + file_name)
                 pd.set_option("display.max_rows", None)
                 pd.set_option("display.max_columns", None)
                 
@@ -1155,6 +1191,8 @@ def Management_RP(request):
                             'janggadb_jenis_anggaran', con=engine, index=False, if_exists='append'
                 )
                 messages.add_message(request, messages.SUCCESS, 'Data berhasil diinputkan')
+                return redirect('management-rincian')
+            
             if 'inputAnggaran2' in request.POST:
                 uploaded_files = request.FILES['lampiran-rab']
                 fs = FileSystemStorage()                    
@@ -1177,6 +1215,7 @@ def Management_RP(request):
                             'janggadb_breakdown_rab', con=engine, index=False, if_exists='append'
                 )
                 messages.add_message(request, messages.SUCCESS, 'Data berhasil diinputkan')
+                return redirect('management-rincian')
 
         context = {'projek':projek}
         return render(request,'finance/breakdown-rab.html', context)    
@@ -1190,12 +1229,14 @@ def Management_RL(request):
     user = request.user
     if user.is_authenticated and user.is_management:
         projek = Project.objects.only('id')
+        old_pro = None
         if request.method == 'POST':
             if 'inputProjek' in request.POST:
                 pro = request.POST['pilih']
+                old_pro = int(pro)
                 rincian = Breakdown_RAB.objects.filter(client_id=pro).only('nama_rincian')
                 
-                context = {'projek':projek,'pro':pro,'rincian':rincian}
+                context = {'projek':projek,'pro':pro,'rincian':rincian,'old':old_pro}
                 return render(request, 'finance/rincian-logistik.html', context)
             if 'inputLogistik' in request.POST:
                 uploaded_files = request.FILES['lampiran-rab']
@@ -1219,6 +1260,7 @@ def Management_RL(request):
                             'janggadb_rincian_logistik', con=engine, index=False, if_exists='append'
                 )
                 messages.add_message(request, messages.SUCCESS, 'Data berhasil diinputkan')
+                return redirect('management-rl')
 
         context = {'projek':projek}
         return render(request,'finance/rincian-logistik.html', context)

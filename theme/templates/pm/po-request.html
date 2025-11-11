@@ -2,32 +2,28 @@
 {% load static %}
 
 {% block content %}
-    <fieldset class="fieldset">
-        <form method="post">
-            {% csrf_token %}
-            <legend class="fieldset-legend">Projek</legend>
-            {% if messages %}
-                {% for m in messages %}
-                <div role="alert" class="alert alert-success max-w-sm my-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>{{ m }}</span>
-                </div>
-                {% endfor %}
-            {% endif %}
-            <select class="select validator max-w-xs" required name="pilihan" id="pilihan">
-                <option disabled selected value="">Pilih Projek</option>
-                {% if projek %}
-                    {% for p in projek %}
-                        <option value={{ p.id }}>{{ p.client }}</option>   
-                    {% endfor %}             
-                {% endif %}
-            </select>
-            <p class="validator-hint">Required</p>
-            <button class="btn btn-success" type="submit" id="inputClient" name="inputClient">Submit</button>
-        </form>
-    </fieldset>
+<fieldset class="fieldset">
+    <form method="post">
+        {% csrf_token %}
+        <legend class="fieldset-legend">Projek</legend>
+        <select class="hidden" id="pilihan" name="pilihan" data-select='{
+        "placeholder": "Nomor SPK",
+        "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
+        "toggleClasses": "p-2 max-w-xs advance-select-toggle select select-disabled:pointer-events-none select-disabled:opacity-40",
+        "hasSearch": true,
+        "dropdownClasses": "advance-select-menu max-w-xs max-h-52 pt-0 overflow-y-auto",
+        "optionClasses": "advance-select-option selected:select-active",
+        "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"icon-[tabler--check] shrink-0 size-4 text-primary hidden selected:block \"></span></div>"
+        }' required>
+        <option disabled selected value="">Nomor SPK</option>
+        {% if projek %} {% for p in projek %}
+        <option value="{{ p.id }}" {% if p.id == old %} selected {% endif%}>{{ p.nomor_SPK }}</option>
+        {% endfor %} {% endif %}
+        </select>
+        <p class="validator-hint">Required</p>
+        <button class="btn btn-success" type="submit">Submit</button>
+    </form>
+</fieldset>
     
     {% if client_po %}
         <table class="table table-sm mt-4">
@@ -57,5 +53,8 @@
             </tbody>
         </table>
     </div>
-    {% endif %} 
+    {% endif %}
+
+<script src="{% static "js/flyonui.js" %}"></script>
+
 {% endblock %}

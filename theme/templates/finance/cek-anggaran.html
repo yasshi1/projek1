@@ -8,17 +8,25 @@
         <form method="post">
             {% csrf_token %}
             <legend class="fieldset-legend">Client</legend>
-            <select class="select validator max-w-xs" required name="client" id="client">
-                <option disabled selected value="">Pilih Client</option>
+            <select class="hidden" id="client" name="client" data-select='{
+            "placeholder": "Nomor SPK",
+            "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
+            "toggleClasses": "p-2 max-w-xs advance-select-toggle select select-disabled:pointer-events-none select-disabled:opacity-40",
+            "hasSearch": true,
+            "dropdownClasses": "advance-select-menu max-w-xs max-h-52 pt-0 overflow-y-auto",
+            "optionClasses": "advance-select-option selected:select-active",
+            "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"icon-[tabler--check] shrink-0 size-4 text-primary hidden selected:block \"></span></div>"
+            }' required>
+                <option disabled selected value="">Nomor SPK</option>
                     {% for c in client %}
-                        <option value={{ c.id }}>{{ c.nomor_SPK }}</option>   
+                        <option value="{{ c.id }}" {% if c.id == old %} selected{% endif %}>{{ c.nomor_SPK }}</option>   
                     {% endfor %}             
             </select>
             <p class="validator-hint">Required</p>
             <button class="btn btn-success" type="submit">Submit</button>
     </fieldset>
     {% if anggaran %}
-    <div class="overflow-x-auto rounded-box border border-gray-300 bg-base-100">
+    <div class="overflow-x-auto rounded-box border border-gray-300 bg-base-100 mt-4">
         <table class="table table-sm mt-4">
             <thead>
             <tr>
@@ -49,4 +57,7 @@
         </table>
     </div>
     {% endif %}
+
+<script src="{% static "js/flyonui.js" %}"></script>
+    
 {% endblock %}

@@ -3,11 +3,42 @@
 {% load widget_tweaks %}
 {% block content %}
 <fieldset class="fieldset">
+  {% if messages %} {% for m in messages %} {% if m.tags == 'success' %}
+    <div role="alert" class="alert alert-success">
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6 shrink-0 stroke-current"
+        fill="none"
+        viewBox="0 0 24 24">
+        <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <span>{{ m }}</span>
+    </div>
+    {% endif %} {% if m.tags == 'error' %}
+    <div role="alert" class="alert alert-error">
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6 shrink-0 stroke-current"
+        fill="none"
+        viewBox="0 0 24 24">
+        <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <span>{{ m }}</span>
+    </div>
+    {% endif %} {% endfor %} {% endif %}
   <form method="post">
     {% csrf_token %}
     <legend class="fieldset-legend">Projek</legend>
     <select class="hidden" id="pilih" name="pilih" data-select='{
-    "placeholder": "Pilih Client",
+    "placeholder": "Nomor SPK",
     "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
     "toggleClasses": "p-2 max-w-xs advance-select-toggle select select-disabled:pointer-events-none select-disabled:opacity-40",
     "hasSearch": true,
@@ -15,9 +46,9 @@
     "optionClasses": "advance-select-option selected:select-active",
     "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"icon-[tabler--check] shrink-0 size-4 text-primary hidden selected:block \"></span></div>"
     }' required>
-      <option disabled selected value="">Pilih Projek</option>
+      <option disabled selected value="">Nomor SPK</option>
       {% for p in projek %}
-      <option value="{{ p.id }}">{{ p.nomor_SPK }}</option>
+      <option value="{{ p.id }}" {% if p.id == old %} selected {% endif %}>{{ p.nomor_SPK }}</option>
       {% endfor %}
     </select>
     <p class="validator-hint">Required</p>

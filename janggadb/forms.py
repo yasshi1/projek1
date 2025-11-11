@@ -129,6 +129,7 @@ class ProjekForm(forms.ModelForm):
                 'id':'lampiran-spk',
                 'name':'lampiran-spk',
                 'type':'file',
+                'accept':'.pdf, application/pdf',
             }
         )
     )
@@ -201,12 +202,13 @@ class InvoiceForm(forms.ModelForm):
                 'id':'lampiran',
                 'name':'lampiran',
                 'type':'file',
+                'accept':'.pdf, application/pdf',
             }
         )
     )
     client_id = forms.ModelChoiceField(
         queryset = Project.objects.only('id'),
-        empty_label = 'Pilih Client',
+        empty_label = 'Nomor SPK',
         widget = forms.Select(
             attrs = {
                 'class':'select validator p-2 mb-4 w-auto'
@@ -221,7 +223,7 @@ class InvoiceForm(forms.ModelForm):
 class POform(forms.ModelForm):
     client_id = forms.ModelChoiceField(
         queryset = Project.objects.only('id'),
-        empty_label = 'Pilih Client',
+        empty_label = 'Nomor SPK',
         widget = forms.Select(
             attrs = {
                 'class':'select validator p-2 mb-4 w-auto'            
@@ -328,6 +330,7 @@ class POform(forms.ModelForm):
                 'id':'lampiran',
                 'name':'lampiran',
                 'type':'file',
+                'accept':'.pdf, application/pdf',
             }
         )
     )
@@ -352,7 +355,7 @@ class MonitoringForm(forms.ModelForm):
     )
     client_id = forms.ModelChoiceField(
         queryset = Project.objects.only('id'),
-        empty_label = 'Pilih Client',
+        empty_label = 'Nomor SPK',
         widget = forms.Select(
             attrs = {
                 'class':'select validator p-2 mb-4 w-auto'            
@@ -385,6 +388,7 @@ class MonitoringForm(forms.ModelForm):
                 'class':'file-input p-2 mb-4 w-auto',
                 'id':'lampiran-sj',
                 'name':'lampiran-sj',
+                'accept':'.pdf, application/pdf',
                 'type':'file',
             }
         )
@@ -395,6 +399,7 @@ class MonitoringForm(forms.ModelForm):
                 'class':'file-input p-2 mb-4 w-auto',
                 'id':'lampiran-foto',
                 'name':'lampiran-foto',
+                'accept':'.pdf, application/pdf',
                 'type':'file',
             }
         )
@@ -467,7 +472,7 @@ class ReportForm(forms.ModelForm):
             attrs = {
                 'class':'hidden',
                 'data-select':"""{
-    "placeholder": "Pilih Client",
+    "placeholder": "Nomor SPK",
     "toggleTag": "<button type=\'button\' aria-expanded=\'false\'></button>",
     "toggleClasses": "p-2 mb-4 max-w-md advance-select-toggle select select-disabled:pointer-events-none select-disabled:opacity-40",
     "hasSearch": true,
@@ -608,7 +613,7 @@ class barangKeluarForm(forms.ModelForm):
             attrs = {
                 'class':'hidden',
                 'data-select':"""{
-    "placeholder": "Pilih Client",
+    "placeholder": "Nomor SPK",
     "toggleTag": "<button type=\'button\' aria-expanded=\'false\'></button>",
     "toggleClasses": "p-2 mb-4 max-w-lg advance-select-toggle select select-disabled:pointer-events-none select-disabled:opacity-40",
     "hasSearch": true,
@@ -670,7 +675,7 @@ class dailyForm(forms.ModelForm):
             attrs = {
                 'class':'hidden',
                 'data-select':"""{
-    "placeholder": "Pilih Client",
+    "placeholder": "Nomor SPK",
     "toggleTag": "<button type=\'button\' aria-expanded=\'false\'></button>",
     "toggleClasses": "p-2 mb-4 max-w-lg advance-select-toggle select select-disabled:pointer-events-none select-disabled:opacity-40",
     "hasSearch": true,
@@ -754,6 +759,7 @@ class dailyForm(forms.ModelForm):
                 'class':'file-input p-2 mb-4 w-auto',
                 'id':'lampiran-dokumentasi',
                 'name':'lampiran-dokumentasi',
+                'accept':'.pdf, application/pdf',
                 'type':'file',
             }
         )
@@ -780,7 +786,7 @@ class penagihanForm(forms.ModelForm):
             attrs = {
                 'class':'hidden',
                 'data-select':"""{
-    "placeholder": "Pilih Client",
+    "placeholder": "Nomor SPK",
     "toggleTag": "<button type=\'button\' aria-expanded=\'false\'></button>",
     "toggleClasses": "p-2 mb-4 max-w-lg advance-select-toggle select select-disabled:pointer-events-none select-disabled:opacity-40",
     "hasSearch": true,
@@ -798,6 +804,7 @@ class penagihanForm(forms.ModelForm):
                 'id':'lampiran-dokumentasi',
                 'name':'lampiran-dokumentasi',
                 'type':'file',
+                'accept':'.pdf, application/pdf',
             }
         )
     )
@@ -808,6 +815,7 @@ class penagihanForm(forms.ModelForm):
                 'id':'lampiran-lpp',
                 'name':'lampiran-lpp',
                 'type':'file',
+                'accept':'.pdf, application/pdf',
             }
         )
     )         
@@ -817,6 +825,7 @@ class penagihanForm(forms.ModelForm):
                 'class':'file-input p-2 mb-4 w-auto',
                 'id':'lampiran-lokasi',
                 'name':'lampiran-lokasi',
+                'accept':'.pdf, application/pdf',
                 'type':'file',
             }
         )
@@ -827,6 +836,7 @@ class penagihanForm(forms.ModelForm):
                 'class':'file-input p-2 mb-4 w-auto',
                 'id':'lampiran-mapping',
                 'name':'lampiran-mapping',
+                'accept':'.pdf, application/pdf',
                 'type':'file',
             }
         )
@@ -837,6 +847,7 @@ class penagihanForm(forms.ModelForm):
                 'class':'file-input p-2 mb-4 w-auto',
                 'id':'lampiran-monitoring',
                 'name':'lampiran-monitoring',
+                'accept':'.pdf, application/pdf',
                 'type':'file',
             }
         )
@@ -853,7 +864,7 @@ class breakdownForm(forms.ModelForm):
             attrs = {
                 'class':'hidden',
                 'data-select':"""{
-    "placeholder": "Pilih Client",
+    "placeholder": "Nomor SPK",
     "toggleTag": "<button type=\'button\' aria-expanded=\'false\'></button>",
     "toggleClasses": "p-2 mb-4 max-w-lg advance-select-toggle select validator select-disabled:pointer-events-none select-disabled:opacity-40",
     "hasSearch": true,
@@ -887,7 +898,7 @@ class kurvasForm(forms.ModelForm):
             attrs = {
                 'class':'hidden',
                 'data-select':"""{
-    "placeholder": "Pilih Projek",
+    "placeholder": "Nomor SPK",
     "toggleTag": "<button type=\'button\' aria-expanded=\'false\'></button>",
     "toggleClasses": "p-2 mb-4 max-w-lg advance-select-toggle select validator select-disabled:pointer-events-none select-disabled:opacity-40",
     "hasSearch": true,
@@ -903,7 +914,8 @@ class kurvasForm(forms.ModelForm):
             attrs= {
                 'class':'file-input p-2 w-auto',
                 'id':'lampiran',
-                'name':'lampiran',
+                'name':'lampiran',                
+                'accept':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel',
                 'type':'file',
             }
         )
@@ -920,7 +932,7 @@ class weeklyForm(forms.ModelForm):
             attrs = {
                 'class':'hidden',
                 'data-select':"""{
-    "placeholder": "Pilih Projek",
+    "placeholder": "Nomor SPK",
     "toggleTag": "<button type=\'button\' aria-expanded=\'false\'></button>",
     "toggleClasses": "p-2 mb-4 max-w-lg advance-select-toggle select validator select-disabled:pointer-events-none select-disabled:opacity-40",
     "hasSearch": true,

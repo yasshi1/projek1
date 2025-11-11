@@ -30,7 +30,7 @@
         Rp. {% if budget %} 
               {{ budget }} 
             {% else %}
-              0  
+              0
             {% endif %}
       </p>
     </div>
@@ -70,9 +70,9 @@
           id="client"
           name="client"
           required>
-          <option selected value="">Pilih Projek</option>
+          <option selected value="">Nomor SPK</option>
           {% for p in projek %}
-            <option value="{{ p.id }}">{{ p.nomor_SPK }}</option>
+            <option value="{{ p.id }}" {% if p.id == old %} selected{% endif %}>{{ p.nomor_SPK }}</option>
           {% endfor %}
         </select>
       </div>
@@ -103,7 +103,8 @@
                     <td>{{ p.client_id__nomor_SPK }}</td>
                     <td>Rp. {{ p.total_anggaran }}</td>
                     <td>Rp. {{ p.total_expense }}</td>
-                    <td>Rp. {{ p.sisa_anggaran }}                          
+                    <td>Rp. {% if p.sisa_anggaran is None %} {{ p.total_anggaran }}
+                            {% else %} {{ p.sisa_anggaran }} {% endif %}
                     </td>
                 </tr>   
             {% endfor %} 

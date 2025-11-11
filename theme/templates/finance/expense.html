@@ -8,29 +8,49 @@
         <form method="post">
             {% csrf_token %}
             <legend class="fieldset-legend">Client</legend>
-            
-            {% if messages %}
-                {% for msg in messages %}
-                <div role="alert" class="alert alert-success my-2">
-                    <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-6 w-6 shrink-0 stroke-current"
-                    fill="none"
-                    viewBox="0 0 24 24">
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>{{ msg }}</span>
-                </div>
-                {% endfor %}
-            {% endif %}
-            <select class="select validator max-w-xs" required name="pilihan" id="pilihan">
-                <option disabled selected value="">Pilih Client</option>
+            {% if messages %} {% for m in messages %} {% if m.tags == 'success' %}
+            <div role="alert" class="alert alert-success">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6 shrink-0 stroke-current"
+                fill="none"
+                viewBox="0 0 24 24">
+                <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{{ m }}</span>
+            </div>
+            {% endif %} {% if m.tags == 'error' %}
+            <div role="alert" class="alert alert-error">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6 shrink-0 stroke-current"
+                fill="none"
+                viewBox="0 0 24 24">
+                <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{{ m }}</span>
+            </div>
+            {% endif %} {% endfor %} {% endif %}
+            <select class="hidden" id="pilihan" name="pilihan" data-select='{
+            "placeholder": "Nomor SPK",
+            "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
+            "toggleClasses": "p-2 max-w-xs advance-select-toggle select select-disabled:pointer-events-none select-disabled:opacity-40",
+            "hasSearch": true,
+            "dropdownClasses": "advance-select-menu max-w-xs max-h-52 pt-0 overflow-y-auto",
+            "optionClasses": "advance-select-option selected:select-active",
+            "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"icon-[tabler--check] shrink-0 size-4 text-primary hidden selected:block \"></span></div>"
+            }' required>
+                <option disabled selected value="">Nomor SPK</option>
                     {% for c in client %}
-                        <option value={{ c.id }}>{{ c.nomor_SPK }}</option>   
+                        <option value="{{ c.id }}" {% if c.id == old %} selected {% endif %}>{{ c.nomor_SPK }}</option>   
                     {% endfor %}             
             </select>
             <p class="validator-hint">Required</p>
@@ -83,6 +103,8 @@
             </tbody>
         </table>
     </div>
-    
     {% endif %}
+
+<script src="{% static "js/flyonui.js" %}"></script>
+
 {% endblock %}

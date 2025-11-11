@@ -34,9 +34,9 @@
                 id="client"
                 name="client"
                 required>
-                <option selected value="">Pilih Projek</option>
+                <option selected value="">Nomor SPK</option>
                 {% for p in projek %}
-                    <option value="{{ p.id }}">{{ p.nomor_SPK }}</option>
+                    <option value="{{ p.id }}" {% if p.id == old %} selected {% endif %}>{{ p.nomor_SPK }}</option>
                 {% endfor %}
                 </select>
             </div>

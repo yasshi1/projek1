@@ -108,13 +108,19 @@ class data_Expense(models.Model):
     sisa_budget = models.BigIntegerField(null = False)
 
 class monitoring_PO(models.Model):
-    client_id = models.ForeignKey(Project, null=False, on_delete=models.CASCADE)
+    client_id = models.ForeignKey(Project, null=False, on_delete=models.CASCADE, related_name='monitor')
     nomor_po = models.ForeignKey(PO, null=False, on_delete=models.CASCADE)
     jumlah = models.CharField(max_length=100)
     tanggal = models.DateField(null=False)
     lampiran_sj = models.FileField(upload_to='monitoring/sj', blank=True)
     lampiran_foto = models.FileField(upload_to='monitoring/dokumentasi', blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def get_sjname(self):
+        return Path(self.lampiran_sj.name).name
+    
+    def get_dokname(self):
+        return Path(self.lampiran_foto.name).name
 
 class Pekerjaan_mapping(models.Model):
     jenis_pekerjaan = models.CharField(max_length=100) 
