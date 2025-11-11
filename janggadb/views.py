@@ -209,9 +209,14 @@ def Admin(request):
             return render(request,'admin/dashboard.html', context)
         else:
             engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/jangga_db')
-            current_project = Project.objects.latest('tanggal')
-            projek_id = current_project.id
-            old_pro = int(projek_id)
+            try:
+                current_project = Project.objects.latest('tanggal')
+                projek_id = current_project.id
+                old_pro = int(projek_id)
+            except Project.DoesNotExist:
+                current_project = None
+                projek_id = None
+                old_pro = None
             try:
                 daily = Daily_Report.objects.filter(client_id=projek_id).latest('tanggal')
                 total_manpower = (daily.harian + daily.me + daily.sipil + daily.genteng + daily.plumbing)
