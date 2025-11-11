@@ -1179,7 +1179,7 @@ def Management_RP(request):
                 # simpan file ke dalam local server
                 file_name = uploaded_files.name 
 
-                df = pd.read_excel(r"D:/Kerja/projek1_hosting/projek1/data/rap/" + file_name)
+                df = pd.read_excel("/srv/jcr/projek1/data/" + file_name)
                 pd.set_option("display.max_rows", None)
                 pd.set_option("display.max_columns", None)
                 
@@ -1200,7 +1200,7 @@ def Management_RP(request):
                 # simpan file ke dalam local server
                 file_name = uploaded_files.name 
 
-                df = pd.read_excel(r"D:/Kerja/projek1_hosting/projek1/data/" + file_name)
+                df = pd.read_excel("/srv/jcr/projek1/data/" + file_name)
                 pd.set_option("display.max_rows", None)
                 pd.set_option("display.max_columns", None)  
 
@@ -1245,7 +1245,7 @@ def Management_RL(request):
                 # simpan file ke dalam local server
                 file_name = uploaded_files.name 
 
-                df = pd.read_excel(r"D:/Kerja/projek1_hosting/projek1/data/" + file_name)
+                df = pd.read_excel("/srv/jcr/projek1/data/" + file_name)
                 pd.set_option("display.max_rows", None)
                 pd.set_option("display.max_columns", None)  
 
