@@ -731,11 +731,10 @@ def Logistik(request):
                 project = current_project.id
             except Project.DoesNotExist:
                 current_project = None
-                project = 0
+                project = None
             old_pro = int(project)
-            
-            status = PO.objects.filter(client_id=project).exclude(status='barang sampai')
 
+            status = PO.objects.filter(client_id=project).exclude(status='barang sampai')
             opname = Stock_Opname.objects.filter(client_id=project).order_by('persentase')
             for o in opname:
                 o.persen = round(o.persentase*100)
@@ -924,7 +923,10 @@ def Management(request):
     if user.is_authenticated and user.is_management:
         from django.db.models import Sum, Value
         from django.db.models.functions import Coalesce
-        projek = Project.objects.only('id')
+        try:
+            projek = Project.objects.only('id')
+        except Project.DoesNotExist:
+            projek = None
         old_pro = None
         if request.method == 'POST':
             pro = request.POST['client']
@@ -950,14 +952,16 @@ def Management(request):
             except:                
                 diff = 0
 
+            try:                
+                data_anggaran = (
+                    Anggaran.objects
+                    .filter(client_id=pro)
+                    .annotate(total_expense=Coalesce(Sum('data_expense__total'), Value(0)))
+                    .values('jenis_anggaran__nama_jenis', 'total_anggaran', 'total_expense', 'client_id__nomor_SPK', 'sisa_anggaran')
+                )
 
-                
-            data_anggaran = (
-                Anggaran.objects
-                .filter(client_id=pro)
-                .annotate(total_expense=Coalesce(Sum('data_expense__total'), Value(0)))
-                .values('jenis_anggaran__nama_jenis', 'total_anggaran', 'total_expense', 'client_id__nomor_SPK', 'sisa_anggaran')
-            )
+            except Anggaran.DoesNotExist:
+                data_anggaran = None
 
             paginator = Paginator(data_anggaran, 5)
             page_number = request.GET.get("page")
@@ -966,31 +970,43 @@ def Management(request):
 
             context = {'projek':projek,'budget':budget,'aktual':aktual,'diff':diff,'page_obj':page_obj,'old':old_pro}
             return render(request,'finance/dashboard.html', context)
-        else:    
-            current_project = Project.objects.latest('tanggal')
-            project = current_project.id
+        else:   
+            try: 
+                current_project = Project.objects.latest('tanggal')
+                project = current_project.id
+            except Project.DoesNotExist:
+                current_project = None
+                project = None
             old_pro = int(project)
             try:
                 budget = (
                     Anggaran.objects
                     .filter(client_id=project)
                     .aggregate(total_sum=Sum('total_anggaran')))['total_sum']
+            except:
+                budget = None
+
+            try:
                 aktual = (
                     data_Expense.objects
                     .filter(client_id=project)
                     .aggregate(total_sum=Sum('total')))['total_sum']
+            except:
+                aktual = None
+            try:
                 diff = int(budget) - int(aktual)
             except:
-                budget = None
-                aktual = None
                 diff = 0
                 
-            data_anggaran = (
-                Anggaran.objects
-                .filter(client_id=project)
-                .annotate(total_expense=Coalesce(Sum('data_expense__total'), Value(0)))
-                .values('jenis_anggaran__nama_jenis', 'total_anggaran', 'total_expense', 'client_id__nomor_SPK', 'sisa_anggaran')
-            )
+            try:
+                data_anggaran = (
+                    Anggaran.objects
+                    .filter(client_id=project)
+                    .annotate(total_expense=Coalesce(Sum('data_expense__total'), Value(0)))
+                    .values('jenis_anggaran__nama_jenis', 'total_anggaran', 'total_expense', 'client_id__nomor_SPK', 'sisa_anggaran')
+                )
+            except Anggaran.DoesNotExist:
+                data_anggaran = None
 
             paginator = Paginator(data_anggaran, 5)
             page_number = request.GET.get("page")
