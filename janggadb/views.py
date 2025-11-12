@@ -455,11 +455,14 @@ def Project_Manager(request):
     user = request.user
     if user.is_authenticated and user.is_projectManager:
         import plotly.express as px
-        projek = Project.objects.only('nomor_SPK')
+        try:
+            projek = Project.objects.only('nomor_SPK')
+        except Project.DoesNotExist:
+            projek = None
         old_pro = None
         if request.method == 'POST':
             engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/jangga_db')
-            pro = request.POST['client']
+            pro = request.POST['client']            
             old_pro = int(pro)
             try:
                 daily = Daily_Report.objects.filter(client_id=pro).latest('tanggal')
@@ -467,76 +470,89 @@ def Project_Manager(request):
             except Daily_Report.DoesNotExist:
                 daily = None
                 total_manpower = None
-            query = f"""SELECT jpm.jenis_pekerjaan, jpm.fase, jmr.nomor_unit, jmr.aktual_mapping as Hari_Ini, jmr.total_mapping as Max, jmr.tanggal FROM janggadb_mapping_report as jmr CROSS JOIN janggadb_pekerjaan_mapping as jpm WHERE jmr.jenis_pekerjaan_id = jpm.id AND client_id_id = {pro} AND tanggal = (SELECT MAX(tanggal) FROM janggadb_mapping_report)"""
-            query2 = f"""SELECT jpm.jenis_pekerjaan, jpm.fase, jmr.nomor_unit, jmr.aktual_mapping as kemarin from janggadb_mapping_report as jmr CROSS JOIN janggadb_pekerjaan_mapping as jpm WHERE jmr.jenis_pekerjaan_id = jpm.id AND client_id_id = {pro} AND tanggal = (SELECT MAX(tanggal) FROM janggadb_mapping_report) - INTERVAL '1 day'"""
-            
-            df = pd.read_sql_query(query,engine)
-            df2 = pd.read_sql_query(query2,engine)
-            res = pd.merge(df, df2, on=["jenis_pekerjaan", "nomor_unit"], suffixes=("", "_prev"))
 
-            res['total'] = res['hari_ini'] + res['kemarin']            
+            if pro:                
+                query = f"""SELECT jpm.jenis_pekerjaan, jpm.fase, jmr.nomor_unit, jmr.aktual_mapping as Hari_Ini, jmr.total_mapping as Max, jmr.tanggal FROM janggadb_mapping_report as jmr CROSS JOIN janggadb_pekerjaan_mapping as jpm WHERE jmr.jenis_pekerjaan_id = jpm.id AND client_id_id = {pro} AND tanggal = (SELECT MAX(tanggal) FROM janggadb_mapping_report)"""
+                query2 = f"""SELECT jpm.jenis_pekerjaan, jpm.fase, jmr.nomor_unit, jmr.aktual_mapping as kemarin from janggadb_mapping_report as jmr CROSS JOIN janggadb_pekerjaan_mapping as jpm WHERE jmr.jenis_pekerjaan_id = jpm.id AND client_id_id = {pro} AND tanggal = (SELECT MAX(tanggal) FROM janggadb_mapping_report) - INTERVAL '1 day'"""
+                df = pd.read_sql_query(query,engine)
+                df2 = pd.read_sql_query(query2,engine)
+            else:
+                df = pd.DataFrame()
+                df2 = pd.DataFrame()
 
-            res["persentase"] = res["total"] / res["max"] * 100 
-
-            average_persentase = round(res["persentase"].mean(), 2)
-            import math 
-            if math.isnan(average_persentase):
+            if df.empty or df2.empty:
                 average_persentase = 0
-            total_count = (res['total'] == 19).sum()
+                total_count = 0
+                diagram = None
+            else:
+                res = pd.merge(df, df2, on=["jenis_pekerjaan", "nomor_unit"], suffixes=("", "_prev"))
+                res['total'] = res['hari_ini'] + res['kemarin']            
+                res["persentase"] = res["total"] / res["max"] * 100 
+                average_persentase = round(res["persentase"].mean(), 2)
+                
+                import math 
+                if math.isnan(average_persentase):
+                    average_persentase = 0
+                total_count = (res['total'] == 19).sum()
 
-            res['progres'] = np.where(res['total'] == res['max'], 1, 0)
+                res['progres'] = np.where(res['total'] == res['max'], 1, 0)
 
-            res_summary = (res[res["progres"] == 1]
-                            .groupby(["nomor_unit", "jenis_pekerjaan"], as_index=False)
-                            .size()
-                            .rename(columns={"size": "count"}))
+                res_summary = (res[res["progres"] == 1]
+                                .groupby(["nomor_unit", "jenis_pekerjaan"], as_index=False)
+                                .size()
+                                .rename(columns={"size": "count"}))
 
-            all_units = pd.DataFrame({'nomor_unit': sorted(res['nomor_unit'].unique())})
-            all_units['nomor_unit'] = all_units['nomor_unit'].astype(str)
-            res_summary['nomor_unit'] = res_summary['nomor_unit'].astype(str)
+                all_units = pd.DataFrame({'nomor_unit': sorted(res['nomor_unit'].unique())})
+                all_units['nomor_unit'] = all_units['nomor_unit'].astype(str)
+                res_summary['nomor_unit'] = res_summary['nomor_unit'].astype(str)
 
-            res_summary = (
-                all_units
-                .merge(res_summary, on="nomor_unit", how="left")
-                .fillna({'count': 0, 'jenis_pekerjaan': 'Belum Ada Progres'})
-            )
+                res_summary = (
+                    all_units
+                    .merge(res_summary, on="nomor_unit", how="left")
+                    .fillna({'count': 0, 'jenis_pekerjaan': 'Belum Ada Progres'})
+                )
 
-            # Convert count to int (for better display)
-            res_summary["count"] = res_summary["count"].astype(int)                            
+                # Convert count to int (for better display)
+                res_summary["count"] = res_summary["count"].astype(int)                            
 
-            fig = px.bar(
-                res_summary,
-                x="nomor_unit",
-                y="count",
-                color="jenis_pekerjaan",
-                text="jenis_pekerjaan",
-                barmode="stack",
-                title="Progress per Unit"
-            )
+                fig = px.bar(
+                    res_summary,
+                    x="nomor_unit",
+                    y="count",
+                    color="jenis_pekerjaan",
+                    text="jenis_pekerjaan",
+                    barmode="stack",
+                    title="Progress per Unit"
+                )
 
-            fig.update_xaxes(
-                tickmode="linear",
-                dtick=1,
-                categoryarray=res_summary["nomor_unit"].tolist()
-            )
+                fig.update_xaxes(
+                    tickmode="linear",
+                    dtick=1,
+                    categoryarray=res_summary["nomor_unit"].tolist()
+                )
 
-            fig.update_yaxes(dtick=1, tickmode="linear", tickformat="d")
+                fig.update_yaxes(dtick=1, tickmode="linear", tickformat="d")
 
-            fig.update_layout(
-                xaxis_title="Nomor Unit",
-                yaxis_title="Progress Count",
-                paper_bgcolor="lightgray"
-            )
+                fig.update_layout(
+                    xaxis_title="Nomor Unit",
+                    yaxis_title="Progress Count",
+                    paper_bgcolor="lightgray"
+                )
 
-            diagram = fig.to_html()
+                diagram = fig.to_html()
             
-            context = {'user':user,'rata':average_persentase,'total':total_count,'diagram':diagram,'projek':projek,'pro':pro,'total_mp':total_manpower,'old':old_pro}
+            context = {'user':user,'rata':average_persentase,'total':total_count,'diagram':diagram,'projek':projek,'pro':pro,'total_mp':total_manpower,'old':old_pro,'daily':daily}
             return render(request,'pm/dashboard.html', context)
         else:
             engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/jangga_db')
-            current_project = Project.objects.latest('tanggal')
-            projek_id = current_project.id
-            old_pro = int(projek_id)
+            try:
+                current_project = Project.objects.latest('tanggal')
+                projek_id = current_project.id
+                old_pro = int(projek_id)
+            except Project.DoesNotExist:
+                current_project = None
+                projek_id = None
+                old_pro = None
             try:
                 daily = Daily_Report.objects.filter(client_id=projek_id).latest('tanggal')
                 total_manpower = (daily.harian + daily.me + daily.sipil + daily.genteng + daily.plumbing)
@@ -544,67 +560,75 @@ def Project_Manager(request):
                 daily = None
                 total_manpower = None
 
-            query = f"""SELECT jpm.jenis_pekerjaan, jpm.fase, jmr.nomor_unit, jmr.aktual_mapping as Hari_Ini, jmr.total_mapping as Max, jmr.tanggal FROM janggadb_mapping_report as jmr CROSS JOIN janggadb_pekerjaan_mapping as jpm WHERE jmr.jenis_pekerjaan_id = jpm.id AND client_id_id = {projek_id} AND tanggal = (SELECT MAX(tanggal) FROM janggadb_mapping_report)"""
-            query2 = f"""SELECT jpm.jenis_pekerjaan, jpm.fase, jmr.nomor_unit, jmr.aktual_mapping as kemarin FROM janggadb_mapping_report as jmr CROSS JOIN janggadb_pekerjaan_mapping as jpm WHERE jmr.jenis_pekerjaan_id = jpm.id AND client_id_id = {projek_id} AND tanggal = (SELECT tanggal FROM janggadb_mapping_report ORDER BY tanggal ASC LIMIT 1 OFFSET 1)"""
+            if projek_id:
+                query = f"""SELECT jpm.jenis_pekerjaan, jpm.fase, jmr.nomor_unit, jmr.aktual_mapping as Hari_Ini, jmr.total_mapping as Max, jmr.tanggal FROM janggadb_mapping_report as jmr CROSS JOIN janggadb_pekerjaan_mapping as jpm WHERE jmr.jenis_pekerjaan_id = jpm.id AND client_id_id = {projek_id} AND tanggal = (SELECT MAX(tanggal) FROM janggadb_mapping_report)"""
+                query2 = f"""SELECT jpm.jenis_pekerjaan, jpm.fase, jmr.nomor_unit, jmr.aktual_mapping as kemarin FROM janggadb_mapping_report as jmr CROSS JOIN janggadb_pekerjaan_mapping as jpm WHERE jmr.jenis_pekerjaan_id = jpm.id AND client_id_id = {projek_id} AND tanggal = (SELECT tanggal FROM janggadb_mapping_report ORDER BY tanggal ASC LIMIT 1 OFFSET 1)"""
+                df = pd.read_sql_query(query,engine)
+                df2 = pd.read_sql_query(query2,engine)
+            else:
+                df = pd.DataFrame()
+                df2 = pd.DataFrame()
 
-            df = pd.read_sql_query(query,engine)
-            df2 = pd.read_sql_query(query2,engine)
-            res = pd.merge(df,df2, on=["jenis_pekerjaan","nomor_unit"])
-            res['total'] = res['hari_ini'] + res['kemarin']            
-
-            res["persentase"] = res["total"] / res["max"] * 100 
-
-            average_persentase = round(res["persentase"].mean(), 2)
-            import math 
-            if math.isnan(average_persentase):
+            if df.empty or df2.empty:
                 average_persentase = 0
-            total_count = (res['total'] == 19).sum()
+                total_count = 0
+                diagram = None
+            else:
+                res = pd.merge(df, df2, on=["jenis_pekerjaan", "nomor_unit"], suffixes=("", "_prev"))
+                res['total'] = res['hari_ini'] + res['kemarin']            
+                res["persentase"] = res["total"] / res["max"] * 100 
+                average_persentase = round(res["persentase"].mean(), 2)
+                
+                import math 
+                if math.isnan(average_persentase):
+                    average_persentase = 0
+                total_count = (res['total'] == 19).sum()
 
-            res['progres'] = np.where(res['total'] == res['max'], 1, 0)
+                res['progres'] = np.where(res['total'] == res['max'], 1, 0)
 
-            res_summary = (res[res["progres"] == 1]
-                            .groupby(["nomor_unit", "jenis_pekerjaan"], as_index=False)
-                            .size()
-                            .rename(columns={"size": "count"}))
+                res_summary = (res[res["progres"] == 1]
+                                .groupby(["nomor_unit", "jenis_pekerjaan"], as_index=False)
+                                .size()
+                                .rename(columns={"size": "count"}))
 
-            all_units = pd.DataFrame({'nomor_unit': sorted(res['nomor_unit'].unique())})
-            all_units['nomor_unit'] = all_units['nomor_unit'].astype(str)
-            res_summary['nomor_unit'] = res_summary['nomor_unit'].astype(str)
+                all_units = pd.DataFrame({'nomor_unit': sorted(res['nomor_unit'].unique())})
+                all_units['nomor_unit'] = all_units['nomor_unit'].astype(str)
+                res_summary['nomor_unit'] = res_summary['nomor_unit'].astype(str)
 
-            res_summary = (
-                all_units
-                .merge(res_summary, on="nomor_unit", how="left")
-                .fillna({'count': 0, 'jenis_pekerjaan': 'Belum Ada Progres'})
-            )
+                res_summary = (
+                    all_units
+                    .merge(res_summary, on="nomor_unit", how="left")
+                    .fillna({'count': 0, 'jenis_pekerjaan': 'Belum Ada Progres'})
+                )
 
-            # Convert count to int (for better display)
-            res_summary["count"] = res_summary["count"].astype(int)                            
+                # Convert count to int (for better display)
+                res_summary["count"] = res_summary["count"].astype(int)                            
 
-            fig = px.bar(
-                res_summary,
-                x="nomor_unit",
-                y="count",
-                color="jenis_pekerjaan",
-                text="jenis_pekerjaan",
-                barmode="stack",
-                title="Progress per Unit"
-            )
+                fig = px.bar(
+                    res_summary,
+                    x="nomor_unit",
+                    y="count",
+                    color="jenis_pekerjaan",
+                    text="jenis_pekerjaan",
+                    barmode="stack",
+                    title="Progress per Unit"
+                )
 
-            fig.update_xaxes(
-                tickmode="linear",
-                dtick=1,
-                categoryarray=res_summary["nomor_unit"].tolist()
-            )
+                fig.update_xaxes(
+                    tickmode="linear",
+                    dtick=1,
+                    categoryarray=res_summary["nomor_unit"].tolist()
+                )
 
-            fig.update_yaxes(dtick=1, tickmode="linear", tickformat="d")
+                fig.update_yaxes(dtick=1, tickmode="linear", tickformat="d")
 
-            fig.update_layout(
-                xaxis_title="Nomor Unit",
-                yaxis_title="Progress Count",
-                paper_bgcolor="lightgray"
-            )
+                fig.update_layout(
+                    xaxis_title="Nomor Unit",
+                    yaxis_title="Progress Count",
+                    paper_bgcolor="lightgray"
+                )
 
-            diagram = fig.to_html()
+                diagram = fig.to_html()
             
             context = {'user':user,'rata':average_persentase,'total':total_count,'diagram':diagram,'projek':projek,'old':projek_id,'total_mp':total_manpower,'daily':daily,'old':old_pro}
             return render(request,'pm/dashboard.html', context)
@@ -677,26 +701,39 @@ def Project_Manager_KS(request):
 def Logistik(request):
     user = request.user
     if user.is_authenticated and user.is_logistik:
-        projek = Project.objects.only('id')
+        try:
+            projek = Project.objects.only('id')
+        except Project.DoesNotExist:
+            projek = None
         old_pro = None
         if request.method == 'POST':
             pro = request.POST['client']
             old_pro = int(pro)
-            status = PO.objects.filter(client_id=pro).select_related('client_id').exclude(status='barang sampai')
+            if pro:
+                status = PO.objects.filter(client_id=pro).select_related('client_id').exclude(status='barang sampai')
 
-            opname = Stock_Opname.objects.filter(client_id=pro).order_by('persentase')
-            for o in opname:
-                o.persen = round(o.persentase*100)
-            paginator = Paginator(opname, 3)
-            page_number = request.GET.get("page")
-            page_obj = paginator.get_page(page_number)
+                opname = Stock_Opname.objects.filter(client_id=pro).order_by('persentase')
+                for o in opname:
+                    o.persen = round(o.persentase*100)
+                paginator = Paginator(opname, 3)
+                page_number = request.GET.get("page")
+                page_obj = paginator.get_page(page_number)
+            else:
+                status = None
+                opname = None
+                page_obj = None
 
             context = {'page_obj':page_obj, 'status':status,'projek':projek,'old':old_pro}
             return render(request, 'logistik/dashboard.html', context)
         else:
-            current_project = Project.objects.latest('tanggal')
-            project = current_project.id
+            try:
+                current_project = Project.objects.latest('tanggal')
+                project = current_project.id
+            except Project.DoesNotExist:
+                current_project = None
+                project = 0
             old_pro = int(project)
+            
             status = PO.objects.filter(client_id=project).exclude(status='barang sampai')
 
             opname = Stock_Opname.objects.filter(client_id=project).order_by('persentase')
