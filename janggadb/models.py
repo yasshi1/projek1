@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from pathlib import Path
+from django.core.files.storage import default_storage
 
 # create model here
 
@@ -193,6 +194,7 @@ class Stock_Opname(models.Model):
 
 class Transaksi_SO(models.Model):    
     client_id = models.ForeignKey(Project, null=False, on_delete=models.CASCADE)
+    nomor_PO = models.ForeignKey(PO, null=True, on_delete=models.CASCADE)
     stock_opname = models.ForeignKey(Stock_Opname, null=False, on_delete=models.CASCADE)
     tanggal_transaksi = models.DateTimeField(auto_now_add=True)
     jumlah = models.IntegerField(null=False)
@@ -224,6 +226,17 @@ class Kurva_S(models.Model):
     
     def get_filename(self):
         return Path(self.lampiran.name).name
+
+    def save(self, *args, **kwargs):
+        if self.client:
+            try:
+                lampiran_lama = Kurva_S.objects.get(client=self.client)
+                if lampiran_lama.lampiran and self.lampiran != lampiran_lama.lampiran:
+                    if default_storage.exists(lampiran_lama.lampiran.name):
+                        default_storage.delete(lampiran_lama.lampiran.name)
+            except Kurva_S.DoesNotExist:
+                pass 
+        super().save(*args, **kwargs)
 
 class Logistik_Weekly(models.Model):
     client = models.ForeignKey(Project, null=False, on_delete=models.CASCADE)
