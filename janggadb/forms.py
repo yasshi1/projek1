@@ -759,7 +759,7 @@ class dailyForm(forms.ModelForm):
                 'class':'file-input p-2 mb-4 w-auto',
                 'id':'lampiran-dokumentasi',
                 'name':'lampiran-dokumentasi',
-                'accept':'.pdf, application/pdf',
+                'accept':'image/*',
                 'type':'file',
             }
         )
@@ -770,6 +770,7 @@ class dailyForm(forms.ModelForm):
                 'class':'file-input p-2 mb-4 w-auto',
                 'id':'lampiran-cuaca',
                 'name':'lampiran-cuaca',
+                'accept':'image/*',
                 'type':'file',
             }
         )

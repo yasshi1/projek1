@@ -215,8 +215,8 @@ def Admin(request):
                 old_pro = int(projek_id)
             except Project.DoesNotExist:
                 current_project = None
-                projek_id = None
-                old_pro = None
+                projek_id = 0
+            old_pro = int(projek_id)
             try:
                 daily = Daily_Report.objects.filter(client_id=projek_id).latest('tanggal')
                 total_manpower = (daily.harian + daily.me + daily.sipil + daily.genteng + daily.plumbing)
@@ -551,8 +551,8 @@ def Project_Manager(request):
                 old_pro = int(projek_id)
             except Project.DoesNotExist:
                 current_project = None
-                projek_id = None
-                old_pro = None
+                projek_id = 0
+            old_pro = int(projek_id)
             try:
                 daily = Daily_Report.objects.filter(client_id=projek_id).latest('tanggal')
                 total_manpower = (daily.harian + daily.me + daily.sipil + daily.genteng + daily.plumbing)
@@ -729,10 +729,10 @@ def Logistik(request):
             try:
                 current_project = Project.objects.latest('tanggal')
                 project = current_project.id
+                old_pro = int(project)
             except Project.DoesNotExist:
                 current_project = None
                 project = None
-            old_pro = int(project)
 
             status = PO.objects.filter(client_id=project).exclude(status='barang sampai')
             opname = Stock_Opname.objects.filter(client_id=project).order_by('persentase')
@@ -761,13 +761,13 @@ def Logistik_updateStatus(request, id=id):
     jumlah = int(jumlah)
     if sisa == jumlah:        
         PO.objects.filter(nomor_po=id).update(status=update)
-        Stock_Opname.objects.update_or_create(nama_barang=barang, defaults={'client_id':client_obj, 'jumlah':jumlah, 'sisa_barang':sisa, 'satuan':satuan})
+        Stock_Opname.objects.update_or_create(nama_barang=barang, defaults={'client_id':client_obj, 'jumlah':jumlah, 'satuan':satuan})
         return redirect('logistik-monitoring-po')   
     if sisa < jumlah:
         sisa_barang = int(jumlah) - int(sisa) 
         stats = "telah dikirim"        
         PO.objects.filter(nomor_po=id).update(kuantitas=sisa_barang,status=stats)
-        Stock_Opname.objects.update_or_create(nama_barang=barang, defaults={'client_id':client_obj, 'jumlah':jumlah, 'sisa_barang':sisa, 'satuan':satuan})
+        Stock_Opname.objects.update_or_create(nama_barang=barang, defaults={'client_id':client_obj, 'jumlah':sisa, 'satuan':satuan})
         return redirect('logistik-monitoring-po')   
 
 @login_required
@@ -976,7 +976,7 @@ def Management(request):
                 project = current_project.id
             except Project.DoesNotExist:
                 current_project = None
-                project = None
+                project = 0
             old_pro = int(project)
             try:
                 budget = (
